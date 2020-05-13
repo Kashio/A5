@@ -14,7 +14,7 @@ A5::LinearAllocator::~LinearAllocator()
 	m_StartAddress = nullptr;
 }
 
-void* A5::LinearAllocator::Allocate(std::size_t size, std::size_t alignment)
+void* A5::LinearAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
 	void* currentAddress = reinterpret_cast<char*>(m_StartAddress) + m_Offset;
 	std::size_t space = m_Size - m_Offset;

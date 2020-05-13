@@ -1,18 +1,18 @@
-#ifndef LINEAR_ALLOCATOR_H
-#define LINEAR_ALLOCATOR_H
+#ifndef STACK_ALLOCATOR_H
+#define STACK_ALLOCATOR_H
 
 #include "Allocator.h"
 
 namespace A5
 {
-	class LinearAllocator : public Allocator
+	class StackAllocator : public Allocator
 	{
 	public:
 		std::size_t m_Offset;
 
-		LinearAllocator(const std::size_t size);
+		StackAllocator(const std::size_t size);
 
-		~LinearAllocator() override;
+		~StackAllocator() override;
 
 		void* Allocate(const std::size_t size, const std::size_t alignment) override;
 
@@ -21,7 +21,9 @@ namespace A5
 		void Reset() override;
 
 		std::size_t Fragmentation() override;
+	private:
+		using Header = unsigned char;
 	};
 };
 
-#endif // !LINEAR_ALLOCATOR_H
+#endif // !STACK_ALLOCATOR_H

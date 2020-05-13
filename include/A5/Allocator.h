@@ -23,7 +23,7 @@ namespace A5
 		}
 	public:
 		virtual ~Allocator() {};
-		virtual void* Allocate(std::size_t size, std::size_t alignment) = 0;
+		virtual void* Allocate(const std::size_t size, const std::size_t alignment) = 0;
 		virtual void Deallocate(void* ptr) = 0;
 		virtual void Reset() = 0;
 		virtual std::size_t Fragmentation() = 0;
