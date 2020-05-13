@@ -1,4 +1,4 @@
-file(GLOB_RECURSE SOURCES "*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../include/A5/*.h")
+file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../include/A5/*.h")
 
 add_library(A5 STATIC ${SOURCES})
 
