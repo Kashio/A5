@@ -18,7 +18,9 @@ namespace A5
 
 		void Deallocate(void* ptr) override;
 
-		virtual void Reset() override;
+		void Reset() override;
+
+		std::size_t Fragmentation() override;
 	};
 };
 

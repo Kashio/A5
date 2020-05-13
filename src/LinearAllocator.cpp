@@ -37,4 +37,10 @@ void A5::LinearAllocator::Deallocate(void* ptr)
 void A5::LinearAllocator::Reset()
 {
 	m_Offset = 0;
+	m_Allocations = 0;
+}
+
+std::size_t A5::LinearAllocator::Fragmentation()
+{
+	return m_Offset - m_Allocations;
 }

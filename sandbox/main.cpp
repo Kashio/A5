@@ -85,10 +85,14 @@ int main()
 	std::cout << "Size of M*: " << sizeof(M*) << '\n';
 	auto alloc = A5::LinearAllocator(80);
 
-	auto ptr = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
+	auto ptr0 = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
 	auto ptr1 = make_T_Construct<char>(alloc, 1, 'Z');
 	auto ptr2 = make_T_Construct<M>(alloc, 1, 'D', 5);
-	std::cout << "ptr[0].m_a: " << ptr.get()[0].m_a << '\n';
-	std::cout << "ptr[1].m_a: " << ptr.get()[1].m_a << '\n';
+	std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
+	std::cout << "ptr0[1].m_a: " << ptr0.get()[1].m_a << '\n';
+	std::cout << "ptr1[0]: " << ptr1.get()[0] << '\n';
+	std::cout << "ptr2[0].m_a: " << ptr2.get()[0].m_a << '\n';
+	std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
+	std::cout << "Fragmentation: " << alloc.Fragmentation() << '\n';
 	return 0;
 }
