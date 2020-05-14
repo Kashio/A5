@@ -7,15 +7,8 @@ A5::StackAllocator::StackAllocator(const std::size_t size)
 {
 }
 
-A5::StackAllocator::~StackAllocator()
-{
-	::operator delete(m_StartAddress);
-	m_StartAddress = nullptr;
-}
-
 void* A5::StackAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
-	const std::size_t sizeWithHeader = sizeof(Header) + size;
 	void* currentAddress = reinterpret_cast<char*>(m_StartAddress) + m_Offset;
 	void* nextAddress = currentAddress;
 	std::size_t space = m_Size - m_Offset;
@@ -35,28 +28,20 @@ void* A5::StackAllocator::Allocate(const std::size_t size, const std::size_t ali
 	Header* header = reinterpret_cast<Header*>((std::size_t)nextAddress - sizeof(Header));
 	*header = padding;
 
-	m_Offset = m_Size - space + sizeWithHeader;
-	m_Allocations += sizeWithHeader;
+	m_Offset = (std::size_t)nextAddress - (std::size_t)m_StartAddress + size;
 
-	return currentAddress;
+	return nextAddress;
 }
 
 void A5::StackAllocator::Deallocate(void* ptr)
 {
 	const std::size_t currentAddress = (std::size_t)ptr;
-	Header* header = reinterpret_cast<Header*>((std::size_t)currentAddress - sizeof(Header));
+	Header* header = reinterpret_cast<Header*>(currentAddress - sizeof(Header));
 
-	m_Offset = currentAddress - *header;
-	--m_Allocations;
+	m_Offset = currentAddress - (std::size_t)m_StartAddress - *header;
 }
 
 void A5::StackAllocator::Reset()
 {
 	m_Offset = 0;
-	m_Allocations = 0;
-}
-
-std::size_t A5::StackAllocator::Fragmentation()
-{
-	return m_Offset - m_Allocations;
 }

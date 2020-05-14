@@ -8,12 +8,6 @@ A5::LinearAllocator::LinearAllocator(const std::size_t size)
 {
 }
 
-A5::LinearAllocator::~LinearAllocator()
-{
-	::operator delete(m_StartAddress);
-	m_StartAddress = nullptr;
-}
-
 void* A5::LinearAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
 	void* currentAddress = reinterpret_cast<char*>(m_StartAddress) + m_Offset;
@@ -24,23 +18,15 @@ void* A5::LinearAllocator::Allocate(const std::size_t size, const std::size_t al
 		return nullptr;
 
 	m_Offset = m_Size - space + size;
-	m_Allocations += size;
 
 	return currentAddress;
 }
 
 void A5::LinearAllocator::Deallocate(void* ptr)
 {
-	assert(false, "Use LinearAllocator::Reset()");
 }
 
 void A5::LinearAllocator::Reset()
 {
 	m_Offset = 0;
-	m_Allocations = 0;
-}
-
-std::size_t A5::LinearAllocator::Fragmentation()
-{
-	return m_Offset - m_Allocations;
 }
