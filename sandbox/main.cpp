@@ -1,6 +1,7 @@
 #include "A5/Allocator.h"
 #include "A5/LinearAllocator.h"
 #include "A5/StackAllocator.h"
+#include "A5/PoolAllocator.h"
 
 #include <iostream>
 #include <string>
@@ -104,6 +105,29 @@ int main()
 		std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
 		std::cout << "ptr0[1].m_a: " << ptr0.get()[1].m_a << '\n';
 		std::cout << "ptr1[0]: " << ptr1.get()[0] << '\n';
+		std::cout << "ptr2[0].m_a: " << ptr2.get()[0].m_a << '\n';
+		std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
+	}
+	{
+		auto alloc = A5::PoolAllocator(80, sizeof(M), true);
+		auto ptr0 = make_T_Construct<M>(alloc, 1, 'A', 11);
+		auto ptr1 = make_T_Construct<M>(alloc, 1, 'B', 22);
+		auto ptr2 = make_T_Construct<M>(alloc, 1, 'C', 33);
+		auto ptr3 = make_T_Construct<M>(alloc, 1, 'D', 44);
+		auto ptr4 = make_T_Construct<M>(alloc, 1, 'E', 55);
+		auto ptr5 = make_T_Construct<M>(alloc, 1, 'F', 66);
+		auto ptr6 = make_T_Construct<M>(alloc, 1, 'G', 77);
+		auto ptr7 = make_T_Construct<M>(alloc, 1, 'H', 88);
+		auto ptr8 = make_T_Construct<M>(alloc, 1, 'I', 99);
+		auto ptr9 = make_T_Construct<M>(alloc, 1, 'J', 111);
+		auto ptr10 = make_T_Construct<M>(alloc, 1, 'K', 222);
+		alloc.Deallocate(ptr1.get());
+		auto ptr11 = make_T_Construct<M>(alloc, 1, 'L', 333);
+		auto ptr12 = make_T_Construct<M>(alloc, 1, 'M', 444);
+		std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
+		std::cout << "ptr0[0].m_i: " << ptr0.get()[0].m_i << '\n';
+		std::cout << "ptr1[0].m_a: " << ptr1.get()[0].m_a << '\n';
+		std::cout << "ptr1[0].m_i: " << ptr1.get()[0].m_i << '\n';
 		std::cout << "ptr2[0].m_a: " << ptr2.get()[0].m_a << '\n';
 		std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
 	}

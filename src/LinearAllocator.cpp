@@ -6,6 +6,13 @@
 A5::LinearAllocator::LinearAllocator(const std::size_t size)
 	: Allocator(size), m_Offset(0)
 {
+	m_StartAddress = ::operator new(size);
+}
+
+A5::LinearAllocator::~LinearAllocator()
+{
+	::operator delete(m_StartAddress);
+	m_StartAddress = nullptr;
 }
 
 void* A5::LinearAllocator::Allocate(const std::size_t size, const std::size_t alignment)

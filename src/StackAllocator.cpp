@@ -5,6 +5,13 @@
 A5::StackAllocator::StackAllocator(const std::size_t size)
 	: Allocator(size), m_Offset(0)
 {
+	m_StartAddress = ::operator new(size);
+}
+
+A5::StackAllocator::~StackAllocator()
+{
+	::operator delete(m_StartAddress);
+	m_StartAddress = nullptr;
 }
 
 void* A5::StackAllocator::Allocate(const std::size_t size, const std::size_t alignment)
