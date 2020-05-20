@@ -2,6 +2,7 @@
 #include "A5/LinearAllocator.h"
 #include "A5/StackAllocator.h"
 #include "A5/PoolAllocator.h"
+#include "A5/FreeListAllocator.h"
 
 #include <iostream>
 #include <string>
@@ -128,6 +129,22 @@ int main()
 		std::cout << "ptr0[0].m_i: " << ptr0.get()[0].m_i << '\n';
 		std::cout << "ptr1[0].m_a: " << ptr1.get()[0].m_a << '\n';
 		std::cout << "ptr1[0].m_i: " << ptr1.get()[0].m_i << '\n';
+		std::cout << "ptr2[0].m_a: " << ptr2.get()[0].m_a << '\n';
+		std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
+	}
+	{
+		std::cout << "XX: " << sizeof(long double) << '\n';
+		auto alloc = A5::FreeListAllocator(80, true);
+		auto ptr0 = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
+		auto ptr1 = make_T_Construct<char>(alloc, 1, 'Z');
+		auto ptr2 = make_T_Construct<M>(alloc, 1, 'D', 5);
+		alloc.Deallocate(ptr1.get());
+		alloc.Deallocate(ptr0.get());
+		auto ptr3 = make_T_Construct<double>(alloc, 1, 5.5);
+		alloc.Deallocate(ptr3.get());
+		std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
+		std::cout << "ptr0[1].m_a: " << ptr0.get()[1].m_a << '\n';
+		std::cout << "ptr1[0]: " << ptr1.get()[0] << '\n';
 		std::cout << "ptr2[0].m_a: " << ptr2.get()[0].m_a << '\n';
 		std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
 	}

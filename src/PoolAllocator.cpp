@@ -6,7 +6,7 @@
 A5::PoolAllocator::PoolAllocator(const std::size_t size, const std::size_t chunkSize, bool resizeable)
 	: Allocator(size), m_ChunkSize(chunkSize), m_Head(nullptr), m_Resizeable(resizeable)
 {
-	assert(chunkSize >= sizeof(void*) && "Chunk size must be greater or equal to pointer size");
+	assert(chunkSize >= sizeof(Chunk) && "Chunk size must be greater or equal to pointer size");
 	assert(size % chunkSize == 0 && "Total size must be a multiple of chunk size");
 	m_Head = AllocateBlock(chunkSize);
 	m_StartAddress = m_Head;
