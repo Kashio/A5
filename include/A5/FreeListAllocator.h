@@ -32,7 +32,6 @@ namespace A5
 	private:
 		void Find(const std::size_t size, const std::size_t alignment, std::size_t& sizePadding, std::size_t& headerPadding, Chunk*& prev, Chunk*& curr);
 		void Coalescence(Chunk* prev, Chunk* current);
-		Chunk* AllocateBlock(const std::size_t chunkSize);
 	};
 };
 

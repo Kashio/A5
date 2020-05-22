@@ -25,6 +25,15 @@ A5::FreeListAllocator::~FreeListAllocator()
 
 void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
+	if (m_Head == nullptr && m_Resizeable && m_CurrentBlock == m_Blocks.size())
+	{
+		m_Head = reinterpret_cast<Chunk*>(::operator new(m_Size));
+		m_Head->m_Size = m_Size - sizeof(Header);
+		m_Head->m_Next = nullptr;
+		m_Blocks.push_back(m_Head);
+		++m_CurrentBlock;
+	}
+
 	std::size_t sizePadding;
 	std::size_t headerPadding;
 	Chunk* prev;
@@ -51,30 +60,6 @@ void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t 
 	{
 		prev->m_Next = curr->m_Next;
 	}
-
-	/*Chunk* chunk = m_Head;
-	void* currentAddress = reinterpret_cast<char*>(chunk) + sizeof(Header);
-	std::size_t space = chunk->m_Size;
-	std::align(alignment, size, currentAddress, space);
-	std::size_t headerPadding = reinterpret_cast<char*>(currentAddress) - reinterpret_cast<char*>(chunk) - sizeof(Header);
-	std::size_t sizePadding = size % sizeof(std::size_t) != 0 ? sizeof(std::size_t) - size % sizeof(std::size_t) : 0;
-	while (headerPadding + size + sizePadding > chunk->m_Size)
-	{
-		chunk = chunk->m_Next;
-		if (chunk == nullptr)
-			break;
-		currentAddress = reinterpret_cast<char*>(chunk) + sizeof(Header);
-		space = chunk->m_Size;
-		std::align(alignment, size, currentAddress, space);
-		headerPadding = reinterpret_cast<char*>(currentAddress) - reinterpret_cast<char*>(chunk) - sizeof(Header);
-	}
-
-	if (chunk == nullptr)
-		return nullptr;
-
-	m_Head = reinterpret_cast<Chunk*>(reinterpret_cast<char*>(chunk) + sizeof(Header) + headerPadding + size + sizePadding);
-	m_Head->m_Size = chunk->m_Size - (headerPadding + size + sizePadding + sizeof(Header));
-	m_Head->m_Next = nullptr;*/
 
 	for (std::size_t i = 0; i < sizePadding; i += sizeof(std::size_t))
 	{
@@ -140,7 +125,7 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 		std::align(alignment, size, currentAddress, space);
 		sizePadding = reinterpret_cast<char*>(currentAddress) - reinterpret_cast<char*>(it) - sizeof(Header);
 		headerPadding = size % sizeof(std::size_t) != 0 ? sizeof(std::size_t) - size % sizeof(std::size_t) : 0;
-		if (it->m_Size > sizePadding + size + headerPadding)
+		if (it->m_Size >= sizePadding + size + headerPadding)
 		{
 			break;
 		}
@@ -165,21 +150,4 @@ void A5::FreeListAllocator::Coalescence(A5::FreeListAllocator::Chunk* prev, A5::
 		prev->m_Size += current->m_Size + sizeof(Header);
 		prev->m_Next = current->m_Next;
 	}
-}
-
-A5::FreeListAllocator::Chunk* A5::FreeListAllocator::AllocateBlock(const std::size_t chunkSize)
-{
-	//Chunk* block = reinterpret_cast<Chunk*>(::operator new(m_Size));
-
-	//Chunk* chunk = block;
-
-	//for (int i = 0; i < m_Size / m_ChunkSize - 1; ++i) {
-	//	chunk->m_Next = reinterpret_cast<Chunk*>(reinterpret_cast<char*>(chunk) + chunkSize);
-	//	chunk = chunk->m_Next;
-	//}
-
-	//chunk->m_Next = nullptr;
-
-	//return block;
-	return nullptr;
 }
