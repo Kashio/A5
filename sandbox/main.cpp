@@ -3,6 +3,7 @@
 #include "A5/StackAllocator.h"
 #include "A5/PoolAllocator.h"
 #include "A5/FreeListAllocator.h"
+#include "A5/RBTree.h"
 
 #include <iostream>
 #include <string>
@@ -147,6 +148,20 @@ int main()
 		std::cout << "ptr1[0]: " << ptr1.get()[0] << '\n';
 		std::cout << "ptr2[0].m_a: " << ptr2.get()[0].m_a << '\n';
 		std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
+	}
+	{
+		auto t = A5::RBTree(sizeof(A5::RBTree::Node) * 100);
+		t.Insert(13);
+		t.Insert(8);
+		t.Insert(17);
+		t.Insert(15);
+		t.Insert(11);
+		t.Insert(1);
+		t.Insert(25);
+		t.Insert(22);
+		t.Insert(6);
+		t.Insert(27);
+		t.Remove(t.Search(8));
 	}
 	return 0;
 }
