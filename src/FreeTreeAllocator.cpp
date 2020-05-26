@@ -3,11 +3,14 @@
 #include <memory>
 #include <algorithm>
 #include <cassert>
+#include <string>
 
 A5::FreeTreeAllocator::FreeTreeAllocator(const std::size_t size)
 	: Allocator(size)
 {
-	assert(size > sizeof(RBTree::Node) * 2 && "Total size must be bigger than size of RBTree::Node * 2 for allocator with atleast 0 byte space");
+	static std::size_t rootNodePadding = GetRootNodePadding();
+	static std::string message = "Total size must be bigger than size of " + std::to_string(sizeof(RBTree::Node) * 2 + rootNodePadding) + " for allocator with atleast " + std::to_string(sizeof(RBTree::Node) - sizeof(Header)) + " bytes space";
+	assert(size > sizeof(RBTree::Node) * 2 + rootNodePadding && message.c_str());
 	m_StartAddress = ::operator new(size);
 	Init();
 }
@@ -106,4 +109,13 @@ void A5::FreeTreeAllocator::Coalescence(RBTree::Node* curr)
 	{
 		m_Tree.Insert(curr);
 	}
+}
+
+std::size_t A5::FreeTreeAllocator::GetRootNodePadding()
+{
+	void* currentAddress = reinterpret_cast<RBTree::Node*>(sizeof(RBTree::Node) + sizeof(Header));
+	void* nextAddress = currentAddress;
+	std::size_t space = sizeof(RBTree::Node) * 3 - sizeof(Header) - sizeof(RBTree::Node);
+	std::align(alignof(std::max_align_t), sizeof(std::max_align_t), nextAddress, space);
+	return (std::size_t)nextAddress - (std::size_t)currentAddress;
 }

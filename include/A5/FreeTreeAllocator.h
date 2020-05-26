@@ -26,6 +26,7 @@ namespace A5
 	private:
 		void Init();
 		void Coalescence(RBTree::Node* curr);
+		static std::size_t GetRootNodePadding();
 	};
 };
 

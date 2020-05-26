@@ -169,8 +169,6 @@ void A5::RBTree::Remove(Node* z)
 			x->SetColor(NodeColor::BLACK);
 		}
 	}
-
-	//m_NodePool.Deallocate(z);
 }
 
 void A5::RBTree::RemoveFixup(Node* z)

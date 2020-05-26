@@ -3,8 +3,6 @@
 
 #include "Allocator.h"
 
-#include <vector>
-
 namespace A5
 {
 	class FreeListAllocator : public Allocator
@@ -20,11 +18,8 @@ namespace A5
 			Chunk* m_Next;
 		};
 		Chunk* m_Head;
-		std::size_t m_CurrentBlock;
-		std::vector<void*> m_Blocks;
-		bool m_Resizeable;
 	public:
-		FreeListAllocator(const std::size_t size, const bool resizeable);
+		FreeListAllocator(const std::size_t size);
 		~FreeListAllocator();
 		void* Allocate(const std::size_t size, const std::size_t alignment) override;
 		void Deallocate(void* ptr) override;

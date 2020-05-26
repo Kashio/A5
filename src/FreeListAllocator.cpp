@@ -2,49 +2,27 @@
 
 #include <memory>
 #include <cassert>
+#include <string>
 
-A5::FreeListAllocator::FreeListAllocator(const std::size_t size, const bool resizeable)
-	: Allocator(size), m_Head(nullptr), m_Resizeable(resizeable)
+A5::FreeListAllocator::FreeListAllocator(const std::size_t size)
+	: Allocator(size), m_Head(nullptr)
 {
-	assert(size > sizeof(Chunk) && "Total size must be bigger than size of chunk");
+	static std::string message = "Total size must be bigger than size of FreeListAllocator::Chunk for allocator with atleast " + std::to_string(sizeof(std::size_t)) + " bytes space";;
+	assert(size > sizeof(Chunk) && message.c_str());
 	m_StartAddress = ::operator new(size);
 	m_Head = reinterpret_cast<Chunk*>(m_StartAddress);
 	m_Head->m_Size = size - sizeof(Header);
 	m_Head->m_Next = nullptr;
-	m_Blocks.push_back(m_StartAddress);
-	m_CurrentBlock = 1;
 }
 
 A5::FreeListAllocator::~FreeListAllocator()
 {
-	for (auto& block : m_Blocks)
-	{
-		::operator delete(block);
-	}
+	::operator delete(m_StartAddress);
 	m_StartAddress = nullptr;
 }
 
 void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
-	if (m_Head == nullptr && m_Resizeable)
-	{
-		if (m_CurrentBlock == m_Blocks.size())
-		{
-			m_Head = reinterpret_cast<Chunk*>(::operator new(m_Size));
-			m_Head->m_Size = m_Size - sizeof(Header);
-			m_Head->m_Next = nullptr;
-			m_Blocks.push_back(m_Head);
-			++m_CurrentBlock;
-		}
-		else
-		{
-			++m_CurrentBlock;
-			m_Head = reinterpret_cast<Chunk*>(m_Blocks[m_CurrentBlock]);
-			m_Head->m_Size = m_Size - sizeof(Header);
-			m_Head->m_Next = nullptr;
-		}
-	}
-
 	std::size_t sizePadding;
 	std::size_t headerPadding;
 	Chunk* prev;
@@ -126,7 +104,6 @@ void A5::FreeListAllocator::Reset()
 	m_Head = reinterpret_cast<Chunk*>(m_StartAddress);
 	m_Head->m_Size = m_Size - sizeof(Header);
 	m_Head->m_Next = nullptr;
-	m_CurrentBlock = 1;
 }
 
 void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t alignment, std::size_t& sizePadding, std::size_t& headerPadding, Chunk*& prev, Chunk*& curr)

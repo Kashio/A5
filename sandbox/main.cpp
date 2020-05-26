@@ -135,7 +135,7 @@ int main()
 	}
 	{
 		std::cout << "XX: " << sizeof(long double) << '\n';
-		auto alloc = A5::FreeListAllocator(80, true);
+		auto alloc = A5::FreeListAllocator(80);
 		auto ptr0 = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
 		auto ptr1 = make_T_Construct<char>(alloc, 1, 'Z');
 		auto ptr2 = make_T_Construct<M>(alloc, 1, 'D', 5);
