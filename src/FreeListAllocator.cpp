@@ -3,9 +3,10 @@
 #include <memory>
 #include <cassert>
 
-A5::FreeListAllocator::FreeListAllocator(const std::size_t size, bool resizeable)
+A5::FreeListAllocator::FreeListAllocator(const std::size_t size, const bool resizeable)
 	: Allocator(size), m_Head(nullptr), m_Resizeable(resizeable)
 {
+	assert(size > sizeof(Chunk) && "Total size must be bigger than size of chunk");
 	m_StartAddress = ::operator new(size);
 	m_Head = reinterpret_cast<Chunk*>(m_StartAddress);
 	m_Head->m_Size = size - sizeof(Header);
@@ -25,13 +26,23 @@ A5::FreeListAllocator::~FreeListAllocator()
 
 void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
-	if (m_Head == nullptr && m_Resizeable && m_CurrentBlock == m_Blocks.size())
+	if (m_Head == nullptr && m_Resizeable)
 	{
-		m_Head = reinterpret_cast<Chunk*>(::operator new(m_Size));
-		m_Head->m_Size = m_Size - sizeof(Header);
-		m_Head->m_Next = nullptr;
-		m_Blocks.push_back(m_Head);
-		++m_CurrentBlock;
+		if (m_CurrentBlock == m_Blocks.size())
+		{
+			m_Head = reinterpret_cast<Chunk*>(::operator new(m_Size));
+			m_Head->m_Size = m_Size - sizeof(Header);
+			m_Head->m_Next = nullptr;
+			m_Blocks.push_back(m_Head);
+			++m_CurrentBlock;
+		}
+		else
+		{
+			++m_CurrentBlock;
+			m_Head = reinterpret_cast<Chunk*>(m_Blocks[m_CurrentBlock]);
+			m_Head->m_Size = m_Size - sizeof(Header);
+			m_Head->m_Next = nullptr;
+		}
 	}
 
 	std::size_t sizePadding;
@@ -45,13 +56,18 @@ void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t 
 		return nullptr;
 	}
 
-	if (curr->m_Size > sizePadding + size + headerPadding)
+	if (curr->m_Size >= sizePadding + size + headerPadding + sizeof(Chunk*))
 	{
 		Chunk* splittedChunk = reinterpret_cast<Chunk*>(reinterpret_cast<char*>(curr) + sizeof(Header) + sizePadding + size + headerPadding);
 		splittedChunk->m_Size = curr->m_Size - (sizePadding + size + headerPadding + sizeof(Header));
 		splittedChunk->m_Next = curr->m_Next;
 		curr->m_Next = splittedChunk;
 	}
+	else
+	{
+		headerPadding += curr->m_Size - (sizePadding + size + headerPadding);
+	}
+
 	if (prev == nullptr)
 	{
 		m_Head = curr->m_Next;
@@ -115,6 +131,8 @@ void A5::FreeListAllocator::Reset()
 
 void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t alignment, std::size_t& sizePadding, std::size_t& headerPadding, Chunk*& prev, Chunk*& curr)
 {
+	headerPadding = size % sizeof(std::size_t) != 0 ? sizeof(std::size_t) - size % sizeof(std::size_t) : 0;
+
 	Chunk* prevIt = nullptr;
 	Chunk* it = m_Head;
 
@@ -124,7 +142,6 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 		std::size_t space = it->m_Size;
 		std::align(alignment, size, currentAddress, space);
 		sizePadding = reinterpret_cast<char*>(currentAddress) - reinterpret_cast<char*>(it) - sizeof(Header);
-		headerPadding = size % sizeof(std::size_t) != 0 ? sizeof(std::size_t) - size % sizeof(std::size_t) : 0;
 		if (it->m_Size >= sizePadding + size + headerPadding)
 		{
 			break;
@@ -137,17 +154,17 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 	curr = it;
 }
 
-void A5::FreeListAllocator::Coalescence(A5::FreeListAllocator::Chunk* prev, A5::FreeListAllocator::Chunk* current)
+void A5::FreeListAllocator::Coalescence(A5::FreeListAllocator::Chunk* prev, A5::FreeListAllocator::Chunk* curr)
 {
-	if (current->m_Next != nullptr && (std::size_t)current + current->m_Size + sizeof(Header) == (std::size_t)current->m_Next)
+	if (curr->m_Next != nullptr && (std::size_t)curr + curr->m_Size + sizeof(Header) == (std::size_t)curr->m_Next)
 	{
-		current->m_Size += current->m_Next->m_Size + sizeof(Header);
-		current->m_Next = current->m_Next->m_Next;
+		curr->m_Size += curr->m_Next->m_Size + sizeof(Header);
+		curr->m_Next = curr->m_Next->m_Next;
 	}
 
-	if (prev != nullptr && (std::size_t)prev + prev->m_Size + sizeof(Header) == (std::size_t)current)
+	if (prev != nullptr && (std::size_t)prev + prev->m_Size + sizeof(Header) == (std::size_t)curr)
 	{
-		prev->m_Size += current->m_Size + sizeof(Header);
-		prev->m_Next = current->m_Next;
+		prev->m_Size += curr->m_Size + sizeof(Header);
+		prev->m_Next = curr->m_Next;
 	}
 }

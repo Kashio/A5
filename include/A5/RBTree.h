@@ -1,34 +1,65 @@
 #ifndef RBTREE_H
 #define RBTREE_H
 
-#include "PoolAllocator.h";
+#include <type_traits>
 
 namespace A5
 {
 	class RBTree
 	{
 	public:
-		enum class NodeColor
+		enum class NodeColor : std::size_t
 		{
-			BLACK,
-			RED
+			BLACK = 0,
+			RED = 2
 		};
-		struct Node
+		class Node
 		{
+		public:
+			std::size_t m_PrevSize;
+		private:
 			Node* m_Parent;
+		public:
 			Node* m_Right;
 			Node* m_Left;
-			int m_Value;
-			NodeColor m_Color;
+			std::size_t m_Value;
+
+			inline Node* GetParentRaw()
+			{
+				return m_Parent;
+			}
+
+			inline Node* GetParent()
+			{
+				return reinterpret_cast<Node*>((std::size_t)m_Parent >> 2 << 2);
+			}
+
+			inline void SetParent(Node* p)
+			{
+				m_Parent = reinterpret_cast<Node*>((std::size_t)p | 1);
+			}
+
+			inline NodeColor GetColor()
+			{
+				if (m_Parent == nullptr)
+					return NodeColor::BLACK;
+				return (std::size_t)m_Parent & 2 ? NodeColor::RED : NodeColor::BLACK;
+			}
+
+			inline void SetColor(NodeColor color)
+			{
+				m_Parent = reinterpret_cast<Node*>((std::size_t)m_Parent | static_cast<std::underlying_type<NodeColor>::type>(color));
+			}
 		};
-	public:
+	private:
 		Node* m_Nil;
 		Node* m_Root;
-		A5::PoolAllocator m_NodePool;
 	public:
-		RBTree(const std::size_t poolSize);
+		RBTree();
+		void Init(Node* nil);
 		Node* Search(const int v);
-		void Insert(const int v);
+		Node* SearchBest(const int v);
+		void Insert(Node* z);
 		void Remove(Node* z);
 		Node* Successor(Node* x);
 	private:

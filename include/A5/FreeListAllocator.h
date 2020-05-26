@@ -24,14 +24,14 @@ namespace A5
 		std::vector<void*> m_Blocks;
 		bool m_Resizeable;
 	public:
-		FreeListAllocator(const std::size_t size, bool resizeable);
+		FreeListAllocator(const std::size_t size, const bool resizeable);
 		~FreeListAllocator();
 		void* Allocate(const std::size_t size, const std::size_t alignment) override;
 		void Deallocate(void* ptr) override;
 		void Reset() override;
 	private:
 		void Find(const std::size_t size, const std::size_t alignment, std::size_t& sizePadding, std::size_t& headerPadding, Chunk*& prev, Chunk*& curr);
-		void Coalescence(Chunk* prev, Chunk* current);
+		void Coalescence(Chunk* prev, Chunk* curr);
 	};
 };
 

@@ -20,7 +20,7 @@ namespace A5
 		std::vector<void*> m_Blocks;
 		bool m_Resizeable;
 	public:
-		PoolAllocator(const std::size_t size, const std::size_t chunkSize, bool resizeable);
+		PoolAllocator(const std::size_t size, const std::size_t chunkSize, const bool resizeable);
 		~PoolAllocator();
 		void* Allocate(const std::size_t size, const std::size_t alignment) override;
 		void Deallocate(void* ptr) override;

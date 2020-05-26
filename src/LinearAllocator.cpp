@@ -1,7 +1,6 @@
 #include "A5/LinearAllocator.h"
 
 #include <memory>
-#include <cassert>
 
 A5::LinearAllocator::LinearAllocator(const std::size_t size)
 	: Allocator(size), m_Offset(0)

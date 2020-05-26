@@ -3,7 +3,7 @@
 #include "A5/StackAllocator.h"
 #include "A5/PoolAllocator.h"
 #include "A5/FreeListAllocator.h"
-#include "A5/RBTree.h"
+#include "A5/FreeTreeAllocator.h"
 
 #include <iostream>
 #include <string>
@@ -103,7 +103,7 @@ int main()
 		auto ptr0 = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
 		auto ptr1 = make_T_Construct<char>(alloc, 1, 'Z');
 		auto ptr2 = make_T_Construct<M>(alloc, 1, 'D', 5);
-		alloc.Deallocate(ptr1.get());
+		//alloc.Deallocate(ptr1.get());
 		std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
 		std::cout << "ptr0[1].m_a: " << ptr0.get()[1].m_a << '\n';
 		std::cout << "ptr1[0]: " << ptr1.get()[0] << '\n';
@@ -123,7 +123,7 @@ int main()
 		auto ptr8 = make_T_Construct<M>(alloc, 1, 'I', 99);
 		auto ptr9 = make_T_Construct<M>(alloc, 1, 'J', 111);
 		auto ptr10 = make_T_Construct<M>(alloc, 1, 'K', 222);
-		alloc.Deallocate(ptr1.get());
+		//alloc.Deallocate(ptr1.get());
 		auto ptr11 = make_T_Construct<M>(alloc, 1, 'L', 333);
 		auto ptr12 = make_T_Construct<M>(alloc, 1, 'M', 444);
 		std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
@@ -139,10 +139,10 @@ int main()
 		auto ptr0 = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
 		auto ptr1 = make_T_Construct<char>(alloc, 1, 'Z');
 		auto ptr2 = make_T_Construct<M>(alloc, 1, 'D', 5);
-		alloc.Deallocate(ptr1.get());
-		alloc.Deallocate(ptr0.get());
+		/*alloc.Deallocate(ptr1.get());
+		alloc.Deallocate(ptr0.get());*/
 		auto ptr3 = make_T_Construct<double>(alloc, 1, 5.5);
-		alloc.Deallocate(ptr3.get());
+		//alloc.Deallocate(ptr3.get());
 		std::cout << "ptr0[0].m_a: " << ptr0.get()[0].m_a << '\n';
 		std::cout << "ptr0[1].m_a: " << ptr0.get()[1].m_a << '\n';
 		std::cout << "ptr1[0]: " << ptr1.get()[0] << '\n';
@@ -150,18 +150,30 @@ int main()
 		std::cout << "ptr2[0].m_i: " << ptr2.get()[0].m_i << '\n';
 	}
 	{
-		auto t = A5::RBTree(sizeof(A5::RBTree::Node) * 100);
-		t.Insert(13);
-		t.Insert(8);
-		t.Insert(17);
-		t.Insert(15);
-		t.Insert(11);
-		t.Insert(1);
-		t.Insert(25);
-		t.Insert(22);
-		t.Insert(6);
-		t.Insert(27);
-		t.Remove(t.Search(8));
+		auto alloc = A5::FreeTreeAllocator(200);
+		auto ptr0 = make_T_Construct<char>(alloc, 34, 'a');
+		auto ptr1 = make_T_Construct<char>(alloc, 3, 'b');
+		auto ptr3 = make_T_Construct<char>(alloc, 16, 'c');
+		/*auto ptr0 = make_T_Construct<L>(alloc, 2, 'a', 'b', 'c');
+		auto ptr1 = make_T_Construct<char>(alloc, 1, 'Z');
+		auto ptr2 = make_T_Construct<M>(alloc, 1, 'D', 5);
+		alloc.Deallocate(ptr0.get());
+		alloc.Deallocate(ptr2.get());
+		alloc.Deallocate(ptr1.get());*/
+	}
+	{
+		//auto t = A5::RBTree(sizeof(A5::RBTree::Node) * 100);
+		//t.Insert(13);
+		//t.Insert(8);
+		//t.Insert(17);
+		//t.Insert(15);
+		//t.Insert(11);
+		//t.Insert(1);
+		//t.Insert(25);
+		//t.Insert(22);
+		//t.Insert(6);
+		//t.Insert(27);
+		//t.Remove(t.Search(8));
 	}
 	return 0;
 }

@@ -3,7 +3,7 @@
 #include <memory>
 #include <cassert>
 
-A5::PoolAllocator::PoolAllocator(const std::size_t size, const std::size_t chunkSize, bool resizeable)
+A5::PoolAllocator::PoolAllocator(const std::size_t size, const std::size_t chunkSize, const bool resizeable)
 	: Allocator(size), m_ChunkSize(chunkSize), m_Head(nullptr), m_Resizeable(resizeable)
 {
 	assert(chunkSize >= sizeof(Chunk) && "Chunk size must be greater or equal to pointer size");
@@ -27,11 +27,19 @@ void* A5::PoolAllocator::Allocate(const std::size_t size, const std::size_t alig
 {
 	assert(size == m_ChunkSize && "Allocation size must be equal to chunk size");
 
-	if (m_Head == nullptr && m_Resizeable && m_CurrentBlock == m_Blocks.size())
+	if (m_Head == nullptr && m_Resizeable)
 	{
-		m_Head = AllocateBlock(size);
-		m_Blocks.push_back(m_Head);
-		++m_CurrentBlock;
+		if (m_CurrentBlock == m_Blocks.size())
+		{
+			m_Head = AllocateBlock(size);
+			m_Blocks.push_back(m_Head);
+			++m_CurrentBlock;
+		}
+		else
+		{
+			++m_CurrentBlock;
+			m_Head = reinterpret_cast<Chunk*>(m_Blocks[m_CurrentBlock]);
+		}
 	}
 
 	Chunk* chunk = m_Head;
