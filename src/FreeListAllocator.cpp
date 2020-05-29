@@ -112,6 +112,7 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 
 	Chunk* prevIt = nullptr;
 	Chunk* it = m_Head;
+	Chunk* best = nullptr;
 
 	while (it != nullptr)
 	{
@@ -121,9 +122,12 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 		sizePadding = reinterpret_cast<char*>(currentAddress) - reinterpret_cast<char*>(it) - sizeof(Header);
 		if (it->m_Size >= sizePadding + size + headerPadding)
 		{
-			break;
+			if (best == nullptr || it->m_Size < best->m_Size)
+			{
+				prevIt = it;
+				best = it;
+			}
 		}
-		prevIt = it;
 		it = it->m_Next;
 	}
 
