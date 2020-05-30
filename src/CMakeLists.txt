@@ -1,4 +1,4 @@
-add_library(A5 STATIC
+add_library(A5
 			"${CMAKE_SOURCE_DIR}/include/A5/Allocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/LinearAllocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/StackAllocator.h"
@@ -17,3 +17,5 @@ add_library(A5 STATIC
 			)
 
 target_include_directories(A5 PUBLIC "${CMAKE_SOURCE_DIR}/include")
+
+target_compile_features(A5 PUBLIC cxx_std_11)
