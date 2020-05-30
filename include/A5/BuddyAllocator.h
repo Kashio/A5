@@ -15,6 +15,10 @@ namespace A5
 		{
 			std::size_t m_LowerBound;
 			std::size_t m_UpperBound;
+
+			Boundry(const std::size_t lowerBound, const std::size_t upperBound)
+				: m_LowerBound(lowerBound), m_UpperBound(upperBound)
+			{}
 		};
 		std::vector<std::vector<Boundry>> m_FreeLists;
 		std::unordered_map<std::size_t, std::size_t> m_BlockSize;

@@ -1,3 +1,4 @@
+#include <benchmark/benchmark.h>
 #include "A5/Allocator.h"
 #include "A5/LinearAllocator.h"
 #include "A5/StackAllocator.h"
@@ -78,6 +79,13 @@ std::unique_ptr<T[], std::function<void(T*)>> make_T_Construct(Alloc& alloc, std
 
 	return { ptr, std::bind(deleter, std::placeholders::_1, std::ref(alloc), size) };
 }
+
+static void BM_StringCopy(benchmark::State& state) {
+	std::string x = "hello";
+	for (auto _ : state)
+		std::string copy(x);
+}
+BENCHMARK(BM_StringCopy);
 
 int main()
 {

@@ -11,6 +11,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
    include(add_FetchContent_MakeAvailable)
 endif()
 
+set(BENCHMARK_ENABLE_TESTING OFF)
 
 add_subdirectory(src)
 add_subdirectory(sandbox)

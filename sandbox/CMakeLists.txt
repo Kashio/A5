@@ -1,11 +1,10 @@
 add_executable(sandbox main.cpp)
 
-target_link_libraries(sandbox PRIVATE A5)
-
 include(FetchContent)
 FetchContent_Declare(googlebenchmark
                      GIT_REPOSITORY https://github.com/google/benchmark
+					 GIT_TAG master
         )
 FetchContent_MakeAvailable(googlebenchmark)
 
-target_link_libraries(bench benchmark::benchmark)
+target_link_libraries(sandbox PRIVATE A5 benchmark::benchmark)

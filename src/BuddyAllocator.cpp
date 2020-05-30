@@ -106,5 +106,5 @@ void A5::BuddyAllocator::Init()
 	for (std::size_t i = 0; i <= x; i++)
 		m_FreeLists.push_back(std::vector<Boundry>());
 
-	m_FreeLists[x].push_back(Boundry{ (std::size_t)m_StartAddress, (std::size_t)m_StartAddress + m_Size - 1 });
+	m_FreeLists[x].emplace_back((std::size_t)m_StartAddress, (std::size_t)m_StartAddress + m_Size - 1);
 }
