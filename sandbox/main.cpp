@@ -91,14 +91,16 @@ std::unique_ptr<A5::Allocator> GetAllocator(const std::size_t i)
 	case 0:
 		return std::make_unique<A5::LinearAllocator>(mb);
 	case 1:
-		return std::make_unique<A5::StackAllocator>(mb);
+		return std::make_unique<A5::LinearAllocator>(mb);
 	case 2:
-		return std::make_unique<A5::PoolAllocator>(mb, sizeof(M), true);
+		return std::make_unique<A5::StackAllocator>(mb);
 	case 3:
-		return std::make_unique<A5::FreeListAllocator>(mb);
+		return std::make_unique<A5::PoolAllocator>(mb, sizeof(M), true);
 	case 4:
-		return std::make_unique<A5::FreeTreeAllocator>(mb);
+		return std::make_unique<A5::FreeListAllocator>(mb);
 	case 5:
+		return std::make_unique<A5::FreeTreeAllocator>(mb);
+	case 6:
 		return std::make_unique<A5::BuddyAllocator>(mb);
 	}
 }
@@ -116,7 +118,7 @@ void BM_MultipleAllocations(benchmark::State& state)
 	{
 		for (auto s : sizes)
 		{
-			if (i != 2)
+			if (i != 3)
 				object->Allocate(s, maxAlignment);
 			else
 				object->Allocate(sizeof(M), alignof(M));
@@ -160,7 +162,7 @@ void BM_MultipleRandomAllocations(benchmark::State& state)
 	{
 		for (auto s : randomSizes)
 		{
-			if (i != 2)
+			if (i != 3)
 				object->Allocate(s, maxAlignment);
 			else
 				object->Allocate(sizeof(M), alignof(M));
@@ -168,8 +170,8 @@ void BM_MultipleRandomAllocations(benchmark::State& state)
 	}
 }
 
-BENCHMARK(BM_MultipleAllocations)->DenseRange(0, 5);
-BENCHMARK(BM_MultipleRandomAllocations)->DenseRange(0, 5);
+BENCHMARK(BM_MultipleAllocations)->DenseRange(0, 6);
+BENCHMARK(BM_MultipleRandomAllocations)->DenseRange(0, 6);
 
 //int main()
 //{

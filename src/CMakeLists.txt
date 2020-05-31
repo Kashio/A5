@@ -1,5 +1,6 @@
 add_library(A5
 			"${CMAKE_SOURCE_DIR}/include/A5/Allocator.h"
+			"${CMAKE_SOURCE_DIR}/include/A5/CAllocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/LinearAllocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/StackAllocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/PoolAllocator.h"
@@ -7,6 +8,7 @@ add_library(A5
 			"${CMAKE_SOURCE_DIR}/include/A5/FreeTreeAllocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/BuddyAllocator.h"
 			"${CMAKE_SOURCE_DIR}/include/A5/RBTree.h"
+			"${CMAKE_CURRENT_SOURCE_DIR}/CAllocator.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/LinearAllocator.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/StackAllocator.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/PoolAllocator.cpp"

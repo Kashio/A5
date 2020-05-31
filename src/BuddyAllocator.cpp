@@ -60,30 +60,31 @@ void* A5::BuddyAllocator::Allocate(const std::size_t size, const std::size_t ali
 
 void A5::BuddyAllocator::Deallocate(void* ptr)
 {
-	auto it = m_BlockSize.find((std::size_t)ptr);
+	auto it = m_BlockSize.find(static_cast<char*>(ptr));
 	if (it == m_BlockSize.end())
 		return;
 
 	std::size_t x = std::log2(it->second);
-	std::size_t buddyNumber, buddyAddress;
+	std::size_t buddyNumber;
+	char* buddyAddress;
 
-	m_FreeLists[x].emplace_back((std::size_t)ptr, (std::size_t)ptr + it->second - 1);
+	m_FreeLists[x].emplace_back(static_cast<char*>(ptr), static_cast<char*>(ptr) + it->second - 1);
 
-	buddyNumber = ((std::size_t)ptr - (std::size_t)m_StartAddress) / it->second;
+	buddyNumber = (static_cast<char*>(ptr) - static_cast<char*>(m_StartAddress)) / it->second;
 
 	if (buddyNumber % 2 == 0)
-		buddyAddress = (std::size_t)ptr + it->second;
+		buddyAddress = static_cast<char*>(ptr) + it->second;
 	else
-		buddyAddress = (std::size_t)ptr - it->second;
+		buddyAddress = static_cast<char*>(ptr) - it->second;
 
 	for (std::size_t i = 0; i < m_FreeLists[x].size(); i++)
 	{
 		if (m_FreeLists[x][i].m_LowerBound == buddyAddress)
 		{
 			if (buddyNumber % 2 == 0)
-				m_FreeLists[x + 1].emplace_back((std::size_t)ptr, m_FreeLists[x][i].m_UpperBound);
+				m_FreeLists[x + 1].emplace_back(static_cast<char*>(ptr), m_FreeLists[x][i].m_UpperBound);
 			else
-				m_FreeLists[x + 1].emplace_back(buddyAddress, (std::size_t)ptr + it->second - 1);
+				m_FreeLists[x + 1].emplace_back(buddyAddress, static_cast<char*>(ptr) + it->second - 1);
 
 			m_FreeLists[x].erase(m_FreeLists[x].begin() + i);
 			m_FreeLists[x].erase(m_FreeLists[x].end());
@@ -108,5 +109,5 @@ void A5::BuddyAllocator::Init(const std::size_t x)
 	for (std::size_t i = 0; i <= x; i++)
 		m_FreeLists.push_back(std::vector<Boundry>());
 
-	m_FreeLists[x].emplace_back((std::size_t)m_StartAddress, (std::size_t)m_StartAddress + m_Size - 1);
+	m_FreeLists[x].emplace_back(static_cast<char*>(m_StartAddress), static_cast<char*>(m_StartAddress) + m_Size - 1);
 }
