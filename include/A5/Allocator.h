@@ -16,6 +16,7 @@ namespace A5
 			: m_Size(size)
 		{}
 	public:
+		virtual ~Allocator() = default;
 		virtual void* Allocate(const std::size_t size, const std::size_t alignment) = 0;
 		virtual void Deallocate(void* ptr) = 0;
 		virtual void Reset() = 0;

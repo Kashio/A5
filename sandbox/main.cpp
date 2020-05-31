@@ -119,10 +119,11 @@ void BM_MultipleAllocations(benchmark::State& state)
 		for (auto s : sizes)
 		{
 			if (i != 3)
-				object->Allocate(s, maxAlignment);
+				benchmark::DoNotOptimize(object->Allocate(s, maxAlignment));
 			else
-				object->Allocate(sizeof(M), alignof(M));
+				benchmark::DoNotOptimize(object->Allocate(sizeof(M), alignof(M)));
 		}
+		object->Reset();
 	}
 }
 
@@ -163,10 +164,11 @@ void BM_MultipleRandomAllocations(benchmark::State& state)
 		for (auto s : randomSizes)
 		{
 			if (i != 3)
-				object->Allocate(s, maxAlignment);
+				benchmark::DoNotOptimize(object->Allocate(s, maxAlignment));
 			else
-				object->Allocate(sizeof(M), alignof(M));
+				benchmark::DoNotOptimize(object->Allocate(sizeof(M), alignof(M)));
 		}
+		object->Reset();
 	}
 }
 

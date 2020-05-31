@@ -20,7 +20,7 @@ namespace A5
 		Chunk* m_Head;
 	public:
 		FreeListAllocator(const std::size_t size);
-		~FreeListAllocator();
+		~FreeListAllocator() override;
 		void* Allocate(const std::size_t size, const std::size_t alignment) override;
 		void Deallocate(void* ptr) override;
 		void Reset() override;

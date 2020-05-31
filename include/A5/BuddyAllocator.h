@@ -24,7 +24,7 @@ namespace A5
 		std::unordered_map<char*, std::size_t> m_BlockSize;
 	public:
 		BuddyAllocator(const std::size_t size);
-		~BuddyAllocator();
+		~BuddyAllocator() override;
 		void* Allocate(const std::size_t size, const std::size_t alignment) override;
 		void Deallocate(void* ptr) override;
 		void Reset() override;
