@@ -7,7 +7,9 @@ A5::BuddyAllocator::BuddyAllocator(const std::size_t size)
 	: Allocator(size)
 {
 	m_StartAddress = ::operator new(size);
-	Init();
+	std::size_t x = (std::size_t)std::ceil(std::log2(m_Size));
+	m_FreeLists.reserve(x + 1);
+	Init(x);
 }
 
 A5::BuddyAllocator::~BuddyAllocator()
@@ -94,13 +96,12 @@ void A5::BuddyAllocator::Deallocate(void* ptr)
 
 void A5::BuddyAllocator::Reset()
 {
-	Init();
+	std::size_t x = (std::size_t)std::ceil(std::log2(m_Size));
+	Init(x);
 }
 
-void A5::BuddyAllocator::Init()
+void A5::BuddyAllocator::Init(const std::size_t x)
 {
-	std::size_t x = (std::size_t)std::ceil(std::log2(m_Size));
-
 	m_BlockSize.clear();
 	m_FreeLists.clear();
 

@@ -29,7 +29,7 @@ namespace A5
 		void Deallocate(void* ptr) override;
 		void Reset() override;
 	private:
-		void Init();
+		void Init(const std::size_t x);
 	};
 };
 
