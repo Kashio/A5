@@ -112,6 +112,7 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 
 	Chunk* prevIt = nullptr;
 	Chunk* it = m_Head;
+	Chunk* prevBest = nullptr;
 	Chunk* best = nullptr;
 
 	while (it != nullptr)
@@ -124,15 +125,16 @@ void A5::FreeListAllocator::Find(const std::size_t size, const std::size_t align
 		{
 			if (best == nullptr || it->m_Size < best->m_Size)
 			{
-				prevIt = it;
+				prevBest = prevIt;
 				best = it;
 			}
 		}
+		prevIt = it;
 		it = it->m_Next;
 	}
 
-	prev = prevIt;
-	curr = it;
+	prev = prevBest;
+	curr = best;
 }
 
 void A5::FreeListAllocator::Coalescence(A5::FreeListAllocator::Chunk* prev, A5::FreeListAllocator::Chunk* curr)

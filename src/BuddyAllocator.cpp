@@ -18,17 +18,17 @@ A5::BuddyAllocator::~BuddyAllocator()
 
 void* A5::BuddyAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
-	std::size_t x = (std::size_t)std::ceil(std::log2(size));
+	int x = std::ceil(std::log2(size));
 
 	if (m_FreeLists[x].size() > 0)
 	{
 		void* address = (void*)m_FreeLists[x][0].m_LowerBound;
-		m_FreeLists[x].erase(m_FreeLists[x].begin());
 		m_BlockSize[m_FreeLists[x][0].m_LowerBound] = m_FreeLists[x][0].m_UpperBound - m_FreeLists[x][0].m_LowerBound + 1;
+		m_FreeLists[x].erase(m_FreeLists[x].begin());
 		return address;
 	}
 
-	std::size_t i;
+	int i;
 
 	for (i = x + 1; i < m_FreeLists.size(); i++) {
 
@@ -101,6 +101,7 @@ void A5::BuddyAllocator::Init()
 {
 	std::size_t x = (std::size_t)std::ceil(std::log2(m_Size));
 
+	m_BlockSize.clear();
 	m_FreeLists.clear();
 
 	for (std::size_t i = 0; i <= x; i++)

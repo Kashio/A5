@@ -7,4 +7,4 @@ FetchContent_Declare(googlebenchmark
         )
 FetchContent_MakeAvailable(googlebenchmark)
 
-target_link_libraries(sandbox PRIVATE A5 benchmark::benchmark)
+target_link_libraries(sandbox PRIVATE A5 benchmark::benchmark_main)
