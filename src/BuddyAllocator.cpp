@@ -87,7 +87,7 @@ void A5::BuddyAllocator::Deallocate(void* ptr)
 				m_FreeLists[x + 1].emplace_back(buddyAddress, static_cast<char*>(ptr) + it->second - 1);
 
 			m_FreeLists[x].erase(m_FreeLists[x].begin() + i);
-			m_FreeLists[x].erase(m_FreeLists[x].end());
+			m_FreeLists[x].erase(m_FreeLists[x].end() - 1);
 			break;
 		}
 	}
