@@ -1,5 +1,6 @@
 #include <benchmark/benchmark.h>
 #include "A5/Allocator.h"
+#include "A5/CAllocator.h"
 #include "A5/LinearAllocator.h"
 #include "A5/StackAllocator.h"
 #include "A5/PoolAllocator.h"
@@ -85,17 +86,17 @@ std::unique_ptr<T[], std::function<void(T*)>> make_T_Construct(Alloc& alloc, std
 
 std::unique_ptr<A5::Allocator> GetAllocator(const std::size_t i)
 {
-	static constexpr std::size_t mb = 1048576;
+	static constexpr std::size_t mb = 1048576 * 30;
 	switch (i)
 	{
 	case 0:
-		return std::make_unique<A5::LinearAllocator>(mb);
+		return std::make_unique<A5::CAllocator>();
 	case 1:
 		return std::make_unique<A5::LinearAllocator>(mb);
 	case 2:
 		return std::make_unique<A5::StackAllocator>(mb);
 	case 3:
-		return std::make_unique<A5::PoolAllocator>(mb, sizeof(M), true);
+		return std::make_unique<A5::PoolAllocator>(8192000, 8192, true);
 	case 4:
 		return std::make_unique<A5::FreeListAllocator>(mb);
 	case 5:
@@ -110,70 +111,113 @@ void BM_MultipleAllocations(benchmark::State& state)
 	static std::vector<std::size_t> sizes = { 1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192 };
 	static constexpr std::size_t maxAlignment = alignof(std::max_align_t);
 
-	auto i = state.range();
+	auto r = state.range();
 
-	auto object = GetAllocator(i);
+	auto object = GetAllocator(r);
 
 	for (auto _ : state)
 	{
 		for (auto s : sizes)
 		{
-			if (i != 3)
+			if (r != 3)
 				benchmark::DoNotOptimize(object->Allocate(s, maxAlignment));
 			else
-				benchmark::DoNotOptimize(object->Allocate(sizeof(M), alignof(M)));
+				benchmark::DoNotOptimize(object->Allocate(8192, maxAlignment));
 		}
+		state.PauseTiming();
 		object->Reset();
+		state.ResumeTiming();
 	}
 }
 
-template<typename Iter, typename RandomGenerator>
-Iter SelectRandomly(Iter start, Iter end, RandomGenerator& g)
-{
-	std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
-	std::advance(start, dis(g));
-	return start;
-}
-
-template<typename Iter>
-Iter SelectRandomly(Iter start, Iter end)
+unsigned int SelectRandomly(unsigned int max)
 {
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
-	return SelectRandomly(start, end, gen);
+	std::uniform_int_distribution<std::mt19937::result_type> dis(1, max);
+	return dis(gen);
 }
 
 void BM_MultipleRandomAllocations(benchmark::State& state)
 {
-	static std::vector<std::size_t> sizes = { 1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192 };
 	static constexpr std::size_t maxAlignment = alignof(std::max_align_t);
-
 	std::vector<std::size_t> randomSizes;
-	randomSizes.reserve(sizes.size());
-	for (std::size_t i = 0; i < sizes.size(); ++i)
+	randomSizes.reserve(200);
+	for (std::size_t i = 0; i < randomSizes.capacity(); ++i)
 	{
-		randomSizes.push_back(*SelectRandomly(sizes.begin(), sizes.end()));
+		randomSizes.push_back(SelectRandomly(8192));
 	}
 
-	auto i = state.range();
+	auto r = state.range();
 
-	auto object = GetAllocator(i);
+	auto object = GetAllocator(r);
 
 	for (auto _ : state)
 	{
 		for (auto s : randomSizes)
 		{
-			if (i != 3)
+			if (r != 3)
 				benchmark::DoNotOptimize(object->Allocate(s, maxAlignment));
 			else
-				benchmark::DoNotOptimize(object->Allocate(sizeof(M), alignof(M)));
+				benchmark::DoNotOptimize(object->Allocate(8192, maxAlignment));
 		}
+		state.PauseTiming();
 		object->Reset();
+		state.ResumeTiming();
+	}
+}
+
+void BM_MultipleRandomAllocationsAndFrees(benchmark::State& state)
+{
+	static constexpr std::size_t maxAlignment = alignof(std::max_align_t);
+	std::vector<std::size_t> randomSizes;
+	randomSizes.reserve(1000);
+	for (std::size_t i = 0; i < randomSizes.capacity(); ++i)
+	{
+		randomSizes.push_back(SelectRandomly(8192));
+	}
+
+	std::vector<void*> addresses;
+
+	auto r = state.range();
+
+	auto object = GetAllocator(r);
+
+	for (auto _ : state)
+	{
+		for (std::size_t i = 0; i < randomSizes.size() / 2; ++i)
+		{
+			void* address;
+			if (r != 3)
+				address = object->Allocate(randomSizes[i], maxAlignment);
+			else
+				address = object->Allocate(8192, maxAlignment);
+			state.PauseTiming();
+			if (SelectRandomly(100) <= 25)
+				addresses.push_back(address);
+			state.ResumeTiming();
+		}
+		for (std::size_t i = 0; i < addresses.size(); ++i)
+		{
+			object->Deallocate(addresses[i]);
+		}
+		for (std::size_t i = randomSizes.size() / 2; i < randomSizes.size(); ++i)
+		{
+			if (r != 3)
+				benchmark::DoNotOptimize(object->Allocate(randomSizes[i], maxAlignment));
+			else
+				benchmark::DoNotOptimize(object->Allocate(8192, maxAlignment));
+		}
+		state.PauseTiming();
+		object->Reset();
+		addresses.clear();
+		state.ResumeTiming();
 	}
 }
 
 BENCHMARK(BM_MultipleAllocations)->DenseRange(0, 6);
 BENCHMARK(BM_MultipleRandomAllocations)->DenseRange(0, 6);
+BENCHMARK(BM_MultipleRandomAllocationsAndFrees)->DenseRange(0, 6);
 
 //int main()
 //{
