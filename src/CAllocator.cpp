@@ -1,7 +1,7 @@
 #include "A5/CAllocator.h"
 
-A5::CAllocator::CAllocator(const std::size_t size)
-	: Allocator(size)
+A5::CAllocator::CAllocator()
+	: Allocator(0)
 {
 }
 
