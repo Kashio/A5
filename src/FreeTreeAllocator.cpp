@@ -66,7 +66,6 @@ void* A5::FreeTreeAllocator::Allocate(const std::size_t size, const std::size_t 
 void A5::FreeTreeAllocator::Deallocate(void* ptr)
 {
 	Header* header = reinterpret_cast<Header*>(reinterpret_cast<char*>(ptr) - sizeof(Header));
-	*reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(header) + sizeof(Header) + header->m_Size) = sizeof(Header) + header->m_Size;
 	RBTree::Node* node = reinterpret_cast<RBTree::Node*>(header);
 	node->m_Value = header->m_Size;
 	Coalescence(node);
@@ -79,6 +78,7 @@ void A5::FreeTreeAllocator::Reset()
 
 void A5::FreeTreeAllocator::Init()
 {
+	std::memset(m_StartAddress, 0, m_Size);
 	RBTree::Node* nil = reinterpret_cast<RBTree::Node*>(m_StartAddress);
 	m_Tree.Init(nil);
 	void* currentAddress = reinterpret_cast<RBTree::Node*>(reinterpret_cast<char*>(m_StartAddress) + sizeof(RBTree::Node) + sizeof(Header));
@@ -104,10 +104,20 @@ void A5::FreeTreeAllocator::Coalescence(RBTree::Node* curr)
 		m_Tree.Remove(prev);
 		prev->m_Value += curr->m_Value + sizeof(Header);
 		m_Tree.Insert(prev);
+		std::size_t* nextBlockAddress = reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(prev) + sizeof(Header) + prev->m_Value);
+		if ((std::size_t)nextBlockAddress <= (std::size_t)m_StartAddress + m_Size - sizeof(std::size_t))
+		{
+			*nextBlockAddress = sizeof(Header) + prev->m_Value;
+		}
 	}
 	else
 	{
 		m_Tree.Insert(curr);
+		std::size_t* nextBlockAddress = reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(curr) + sizeof(Header) + curr->m_Value);
+		if ((std::size_t)nextBlockAddress <= (std::size_t)m_StartAddress + m_Size - sizeof(std::size_t))
+		{
+			*nextBlockAddress = sizeof(Header) + curr->m_Value;
+		}
 	}
 }
 
