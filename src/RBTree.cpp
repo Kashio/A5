@@ -1,4 +1,4 @@
-#include "A5/RBTree.h"
+﻿#include "A5/RBTree.h"
 
 A5::RBTree::RBTree()
 {
@@ -6,14 +6,15 @@ A5::RBTree::RBTree()
 
 void A5::RBTree::Init(Node* nil)
 {
-	nil->SetColor(NodeColor::BLACK);
 	m_Nil = nil;
-	m_Nil->m_Left = nil;
-	m_Nil->m_Right = nil;
-	m_Root = nil;
+	m_Nil->SetColor(NodeColor::BLACK);
+	m_Nil->m_Left = m_Nil;
+	m_Nil->m_Right = m_Nil;
+	m_Nil->m_Value = 0;
+	m_Root = m_Nil;
 }
 
-A5::RBTree::Node* A5::RBTree::Search(const int v)
+A5::RBTree::Node* A5::RBTree::Search(const std::size_t v)
 {
 	Node* x = m_Root;
 	while (x != m_Nil)
@@ -28,7 +29,7 @@ A5::RBTree::Node* A5::RBTree::Search(const int v)
 	return x;
 }
 
-A5::RBTree::Node* A5::RBTree::SearchBest(const int v)
+A5::RBTree::Node* A5::RBTree::SearchBest(const std::size_t v)
 {
 	Node* y = nullptr;
 	Node* x = m_Root;
@@ -47,10 +48,6 @@ A5::RBTree::Node* A5::RBTree::SearchBest(const int v)
 
 void A5::RBTree::Insert(Node* z)
 {
-	z->m_Left = m_Nil;
-	z->m_Right = m_Nil;
-	z->SetColor(NodeColor::RED);
-
 	Node* y = nullptr;
 	Node* x = m_Root;
 	while (x != m_Nil)
@@ -70,6 +67,10 @@ void A5::RBTree::Insert(Node* z)
 	else
 		y->m_Right = z;
 
+	z->m_Left = m_Nil;
+	z->m_Right = m_Nil;
+	z->SetColor(NodeColor::RED);
+
 	InsertFixup(z);
 }
 
@@ -87,13 +88,13 @@ void A5::RBTree::InsertFixup(Node* z)
 				z->GetParent()->GetParent()->SetColor(NodeColor::RED);
 				z = z->GetParent()->GetParent();
 			}
-			else if (z == z->GetParent()->m_Right)
-			{
-				z = z->GetParent();
-				LeftRotate(z);
-			}
 			else
 			{
+				if (z == z->GetParent()->m_Right)
+				{
+					z = z->GetParent();
+					LeftRotate(z);
+				}
 				z->GetParent()->SetColor(NodeColor::BLACK);
 				z->GetParent()->GetParent()->SetColor(NodeColor::RED);
 				RightRotate(z->GetParent()->GetParent());
@@ -109,13 +110,13 @@ void A5::RBTree::InsertFixup(Node* z)
 				z->GetParent()->GetParent()->SetColor(NodeColor::RED);
 				z = z->GetParent()->GetParent();
 			}
-			else if (z == z->GetParent()->m_Left)
-			{
-				z = z->GetParent();
-				RightRotate(z);
-			}
 			else
 			{
+				if (z == z->GetParent()->m_Left)
+				{
+					z = z->GetParent();
+					RightRotate(z);
+				}
 				z->GetParent()->SetColor(NodeColor::BLACK);
 				z->GetParent()->GetParent()->SetColor(NodeColor::RED);
 				LeftRotate(z->GetParent()->GetParent());
@@ -129,46 +130,43 @@ void A5::RBTree::InsertFixup(Node* z)
 void A5::RBTree::Remove(Node* z)
 {
 	Node* x = nullptr;
-	Node* y = nullptr;
+	Node* y = z;
+	NodeColor yOriginalColor = y->GetColor();
 	if (z->m_Left == m_Nil)
 	{
 		x = z->m_Right;
-		y = x;
-		Transplant(z, x);
+		Transplant(z, z->m_Right);
 	}
 	else if (z->m_Right == m_Nil)
 	{
 		x = z->m_Left;
-		y = x;
-		Transplant(z, x);
+		Transplant(z, z->m_Left);
 	}
 	else
 	{
-		x = Successor(z);
-		y = x->m_Right;
-		Transplant(x, y);
-		Transplant(z, x);
-	}
-
-	if (z->GetColor() == NodeColor::RED)
-	{
-		if (x == m_Nil || x->GetColor() == NodeColor::BLACK)
+		y = Successor(z);
+		yOriginalColor = y->GetColor();
+		x = y->m_Right;
+		if (y->GetParent() == z)
 		{
-			x->SetColor(NodeColor::RED);
-			RemoveFixup(y);
-		}
-	}
-	else
-	{
-		if (x == m_Nil || x->GetColor() == NodeColor::BLACK)
-		{
-			RemoveFixup(y);
+			x->SetParent(y);
 		}
 		else
 		{
-			x->SetColor(NodeColor::BLACK);
+			Transplant(y, y->m_Right);
+			y->m_Right = z->m_Right;
+			if (y->m_Right != m_Nil)
+				y->m_Right->SetParent(y);
 		}
+		Transplant(z, y);
+		y->m_Left = z->m_Left;
+		if (y->m_Left != m_Nil)
+			y->m_Left->SetParent(y);
+		y->SetColor(z->GetColor());
 	}
+
+	if (yOriginalColor == NodeColor::BLACK)
+		RemoveFixup(x);
 }
 
 void A5::RBTree::RemoveFixup(Node* z)
@@ -184,28 +182,27 @@ void A5::RBTree::RemoveFixup(Node* z)
 				w->SetColor(NodeColor::BLACK);
 				z->GetParent()->SetColor(NodeColor::RED);
 				LeftRotate(z->GetParent());
+				w = z->GetParent()->m_Right;
+			}
+			if ((w->m_Right == m_Nil || w->m_Right->GetColor() == NodeColor::BLACK) && (w->m_Left == m_Nil || w->m_Left->GetColor() == NodeColor::BLACK))
+			{
+				w->SetColor(NodeColor::RED);
+				z = z->GetParent();
 			}
 			else
 			{
-				if ((w->m_Right == m_Nil || w->m_Right->GetColor() == NodeColor::BLACK) && (w->m_Left == m_Nil || w->m_Left->GetColor() == NodeColor::BLACK))
-				{
-					w->SetColor(NodeColor::RED);
-					z = z->GetParent();
-				}
-				else if (w->m_Left != m_Nil && w->m_Left->GetColor() == NodeColor::RED && (w->m_Right == m_Nil || w->m_Right->GetColor() == NodeColor::BLACK))
+				if (w->m_Right == m_Nil || w->m_Right->GetColor() == NodeColor::BLACK)
 				{
 					w->m_Left->SetColor(NodeColor::BLACK);
 					w->SetColor(NodeColor::RED);
 					RightRotate(w);
+					w = z->GetParent()->m_Right;
 				}
-				else if (w->m_Right != m_Nil && w->m_Right->GetColor() == NodeColor::RED)
-				{
-					w->SetColor(z->GetParent()->GetColor());
-					z->GetParent()->SetColor(NodeColor::BLACK);
-					w->m_Right->SetColor(NodeColor::BLACK);
-					LeftRotate(z->GetParent());
-					break;
-				}
+				w->SetColor(z->GetParent()->GetColor());
+				z->GetParent()->SetColor(NodeColor::BLACK);
+				w->m_Right->SetColor(NodeColor::BLACK);
+				LeftRotate(z->GetParent());
+				z = m_Root;
 			}
 		}
 		else
@@ -216,28 +213,27 @@ void A5::RBTree::RemoveFixup(Node* z)
 				w->SetColor(NodeColor::BLACK);
 				z->GetParent()->SetColor(NodeColor::RED);
 				RightRotate(z->GetParent());
+				w = z->GetParent()->m_Left;
+			}
+			if ((w->m_Right == m_Nil || w->m_Right->GetColor() == NodeColor::BLACK) && (w->m_Left == m_Nil || w->m_Left->GetColor() == NodeColor::BLACK))
+			{
+				w->SetColor(NodeColor::RED);
+				z = z->GetParent();
 			}
 			else
 			{
-				if ((w->m_Right == m_Nil || w->m_Right->GetColor() == NodeColor::BLACK) && (w->m_Left == m_Nil || w->m_Left->GetColor() == NodeColor::BLACK))
-				{
-					w->SetColor(NodeColor::RED);
-					z = z->GetParent();
-				}
-				else if (w->m_Right != m_Nil && w->m_Right->GetColor() == NodeColor::RED && (w->m_Left == m_Nil || w->m_Left->GetColor() == NodeColor::BLACK))
+				if (w->m_Left == m_Nil || w->m_Left->GetColor() == NodeColor::BLACK)
 				{
 					w->m_Right->SetColor(NodeColor::BLACK);
 					w->SetColor(NodeColor::RED);
 					LeftRotate(w);
+					w = z->GetParent()->m_Left;
 				}
-				else if (w->m_Left != m_Nil && w->m_Left->GetColor() == NodeColor::RED)
-				{
-					w->SetColor(z->GetParent()->GetColor());
-					z->GetParent()->SetColor(NodeColor::BLACK);
-					w->m_Left->SetColor(NodeColor::BLACK);
-					RightRotate(z->GetParent());
-					break;
-				}
+				w->SetColor(z->GetParent()->GetColor());
+				z->GetParent()->SetColor(NodeColor::BLACK);
+				w->m_Left->SetColor(NodeColor::BLACK);
+				RightRotate(z->GetParent());
+				z = m_Root;
 			}
 		}
 	}
@@ -256,57 +252,48 @@ A5::RBTree::Node* A5::RBTree::Successor(Node* x)
 
 void A5::RBTree::Transplant(Node* u, Node* v)
 {
-	v->SetParent(u->GetParent());
-	if (u->m_Left != v)
-	{
-		v->m_Left = u->m_Left;
-		if (u->m_Left != m_Nil)
-			u->m_Left->SetParent(v);
-	}
-	if (u->m_Right != v)
-	{
-		v->m_Right = u->m_Right;
-		if (u->m_Right != m_Nil)
-			u->m_Right->SetParent(v);
-	}
-	if (u->GetParent() == nullptr)
+	Node* uParent = u->GetParent();
+	if (uParent == nullptr)
 		m_Root = v;
-	else if (u == u->GetParent()->m_Left)
-		u->GetParent()->m_Left = v;
+	else if (u == uParent->m_Left)
+		uParent->m_Left = v;
 	else
-		u->GetParent()->m_Right = v;
+		uParent->m_Right = v;
+	v->SetParent(uParent);
 }
 
 void A5::RBTree::LeftRotate(Node* x)
 {
+	Node* xParent = x->GetParent();
 	Node* y = x->m_Right;
 	x->m_Right = y->m_Left;
 	if (y->m_Left != m_Nil)
 		y->m_Left->SetParent(x);
-	y->SetParent(x->GetParent());
-	if (x->GetParent() == nullptr)
+	y->SetParent(xParent);
+	if (xParent == nullptr)
 		m_Root = y;
-	else if (x->GetParent()->m_Left == x)
-		x->GetParent()->m_Left = y;
+	else if (xParent->m_Left == x)
+		xParent->m_Left = y;
 	else
-		x->GetParent()->m_Right = y;
+		xParent->m_Right = y;
 	y->m_Left = x;
 	x->SetParent(y);
 }
 
 void A5::RBTree::RightRotate(Node* x)
 {
+	Node* xParent = x->GetParent();
 	Node* y = x->m_Left;
 	x->m_Left = y->m_Right;
 	if (y->m_Right != m_Nil)
 		y->m_Right->SetParent(x);
-	y->SetParent(x->GetParent());
-	if (x->GetParent() == nullptr)
+	y->SetParent(xParent);
+	if (xParent == nullptr)
 		m_Root = y;
-	else if (x->GetParent()->m_Left == x)
-		x->GetParent()->m_Left = y;
+	else if (xParent->m_Left == x)
+		xParent->m_Left = y;
 	else
-		x->GetParent()->m_Right = y;
+		xParent->m_Right = y;
 	y->m_Right = x;
 	x->SetParent(y);
 }

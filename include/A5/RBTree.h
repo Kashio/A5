@@ -10,8 +10,8 @@ namespace A5
 	public:
 		enum class NodeColor : std::size_t
 		{
-			BLACK = 0,
-			RED = 2
+			BLACK,
+			RED
 		};
 		class Node
 		{
@@ -48,7 +48,10 @@ namespace A5
 
 			inline void SetColor(NodeColor color)
 			{
-				m_Parent = reinterpret_cast<Node*>((std::size_t)m_Parent | static_cast<std::underlying_type<NodeColor>::type>(color));
+				if (color == NodeColor::RED)
+					m_Parent = reinterpret_cast<Node*>((std::size_t)m_Parent | 2);
+				else
+					m_Parent = reinterpret_cast<Node*>((std::size_t)m_Parent & ~((std::size_t)2));
 			}
 		};
 	private:
@@ -57,8 +60,8 @@ namespace A5
 	public:
 		RBTree();
 		void Init(Node* nil);
-		Node* Search(const int v);
-		Node* SearchBest(const int v);
+		Node* Search(const std::size_t v);
+		Node* SearchBest(const std::size_t v);
 		void Insert(Node* z);
 		void Remove(Node* z);
 		Node* Successor(Node* x);
