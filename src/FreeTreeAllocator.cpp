@@ -78,7 +78,6 @@ void A5::FreeTreeAllocator::Reset()
 
 void A5::FreeTreeAllocator::Init()
 {
-	std::memset(m_StartAddress, 0, m_Size);
 	RBTree::Node* nil = reinterpret_cast<RBTree::Node*>(m_StartAddress);
 	m_Tree.Init(nil);
 	void* currentAddress = reinterpret_cast<RBTree::Node*>(reinterpret_cast<char*>(m_StartAddress) + sizeof(RBTree::Node) + sizeof(Header));
