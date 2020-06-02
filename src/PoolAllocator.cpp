@@ -38,7 +38,7 @@ void* A5::PoolAllocator::Allocate(const std::size_t size, const std::size_t alig
 		else
 		{
 			++m_CurrentBlock;
-			m_Head = reinterpret_cast<Chunk*>(m_Blocks[m_CurrentBlock]);
+			m_Head = reinterpret_cast<Chunk*>(m_Blocks[m_CurrentBlock - 1]);
 		}
 	}
 
