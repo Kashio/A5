@@ -1,5 +1,7 @@
 ﻿#include "A5/RBTree.h"
 
+#include <iostream>
+
 A5::RBTree::RBTree()
 {
 }
@@ -43,7 +45,22 @@ A5::RBTree::Node* A5::RBTree::SearchBest(const std::size_t v)
 		else
 			x = x->m_Right;
 	}
+	while (y != nullptr && v > y->m_Value)
+		y = y->GetParent();
 	return y;
+}
+
+A5::RBTree::Node* A5::RBTree::SearchAtLeast(const std::size_t v)
+{
+	Node* x = m_Root;
+	while (x != m_Nil)
+	{
+		if (v <= x->m_Value)
+			return x;
+		else
+			x = x->m_Right;
+	}
+	return nullptr;
 }
 
 void A5::RBTree::Insert(Node* z)
@@ -248,6 +265,36 @@ A5::RBTree::Node* A5::RBTree::Successor(Node* x)
 		x = x->m_Left;
 	}
 	return x;
+}
+
+void A5::RBTree::Print() const
+{
+	if (m_Root->m_Right != m_Nil) {
+		Print(m_Root->m_Right, true, "");
+	}
+	std::cout << m_Root->m_Value << '\n';
+	if (m_Root->m_Left != m_Nil) {
+		Print(m_Root->m_Left, false, "");
+	}
+}
+
+void A5::RBTree::Print(Node* x, bool isRight, std::string indent) const
+{
+	if (x->m_Right != m_Nil) {
+		Print(x->m_Right, true, indent + (isRight ? "        " : " |      "));
+	}
+	std::cout << indent;
+	if (isRight) {
+		std::cout << " /";
+	}
+	else {
+		std::cout << " \\";
+	}
+	std::cout << "----- ";
+	std::cout << x->m_Value << '\n';
+	if (x->m_Left != m_Nil) {
+		Print(x->m_Left, false, indent + (isRight ? " |      " : "        "));
+	}
 }
 
 void A5::RBTree::Transplant(Node* u, Node* v)

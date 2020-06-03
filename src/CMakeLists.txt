@@ -19,5 +19,3 @@ add_library(A5
 			)
 
 target_include_directories(A5 PUBLIC "${CMAKE_SOURCE_DIR}/include")
-
-target_compile_features(A5 PUBLIC cxx_std_11)
