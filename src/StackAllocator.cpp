@@ -17,22 +17,16 @@ A5::StackAllocator::~StackAllocator()
 void* A5::StackAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
 	void* currentAddress = reinterpret_cast<char*>(m_StartAddress) + m_Offset;
-	void* nextAddress = currentAddress;
-	std::size_t space = m_Size - m_Offset;
+	void* nextAddress = reinterpret_cast<void*>(reinterpret_cast<char*>(currentAddress) + sizeof(Header));
+	std::size_t space = m_Size - m_Offset - sizeof(Header);
 	std::align(alignment, size, nextAddress, space);
-
-	std::size_t padding = (std::size_t)nextAddress - (std::size_t)currentAddress;
-	if (padding < sizeof(Header))
-	{
-		nextAddress = reinterpret_cast<void*>((std::size_t)nextAddress + sizeof(Header));
-		std::align(alignment, size, nextAddress, space);
-		padding = (std::size_t)nextAddress - (std::size_t)currentAddress;
-	}
 
 	if ((std::size_t)nextAddress + size > (std::size_t)m_StartAddress + m_Size)
 		return nullptr;
 
-	Header* header = reinterpret_cast<Header*>((std::size_t)nextAddress - sizeof(Header));
+	std::size_t padding = (std::size_t)nextAddress - (std::size_t)currentAddress;
+
+	Header* header = reinterpret_cast<Header*>(reinterpret_cast<char*>(nextAddress) - sizeof(Header));
 	*header = padding;
 
 	m_Offset = (std::size_t)nextAddress - (std::size_t)m_StartAddress + size;
