@@ -16,22 +16,21 @@ private:
 	static constexpr std::size_t s_MaxAlignment = alignof(std::max_align_t);
 	static constexpr std::size_t s_NumOfRandAllocations = 1000;
 	static constexpr std::size_t s_MaxBlockSize = 8192;
-
-	std::vector<std::size_t> m_Sizes;
-	std::vector<std::size_t> m_RandomSizes;
-	std::vector<std::size_t> m_DeallocationIndices;
 protected:
 	static constexpr std::size_t s_30MB = 1024 * 1024 * 30;
+	static std::vector<std::size_t> s_Sizes;
+	static std::vector<std::size_t> s_RandomSizes;
+	static std::vector<std::size_t> s_DeallocationIndices;
 public:
 	void SetUp(const ::benchmark::State& state)
 	{
-		m_Sizes = { 1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192 };
-		m_RandomSizes.reserve(s_NumOfRandAllocations);
-		for (std::size_t i = 0; i < m_RandomSizes.capacity(); ++i)
+		s_Sizes = { 1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192 };
+		s_RandomSizes.reserve(s_NumOfRandAllocations);
+		for (std::size_t i = 0; i < s_RandomSizes.capacity(); ++i)
 		{
-			m_RandomSizes.push_back(SelectRandomly(1, s_MaxBlockSize));
+			s_RandomSizes.push_back(SelectRandomly(1, s_MaxBlockSize));
 			if (SelectRandomly(1, 4) == 1)
-				m_DeallocationIndices.push_back(i);
+				s_DeallocationIndices.push_back(i);
 		}
 	}
 
@@ -43,7 +42,7 @@ protected:
 	{
 		for (auto _ : state)
 		{
-			for (auto s : m_Sizes)
+			for (auto s : s_Sizes)
 			{
 				benchmark::DoNotOptimize(alloc->Allocate(s, s_MaxAlignment));
 			}
@@ -57,7 +56,7 @@ protected:
 	{
 		for (auto _ : state)
 		{
-			for (auto s : m_Sizes)
+			for (auto s : s_Sizes)
 			{
 				benchmark::DoNotOptimize(alloc->Allocate(size, s_MaxAlignment));
 			}
@@ -71,7 +70,7 @@ protected:
 	{
 		for (auto _ : state)
 		{
-			for (auto s : m_RandomSizes)
+			for (auto s : s_RandomSizes)
 			{
 				benchmark::DoNotOptimize(alloc->Allocate(s, s_MaxAlignment));
 			}
@@ -83,15 +82,15 @@ protected:
 
 	void BenchmarkMultieRandomAllocationsAndFrees(A5::Allocator* alloc, benchmark::State& state)
 	{
-		auto it = m_DeallocationIndices.begin();
+		auto it = s_DeallocationIndices.begin();
 		std::vector<void*> addresses;
 
 		for (auto _ : state)
 		{
-			for (std::size_t i = 0; i < m_RandomSizes.size(); ++i)
+			for (std::size_t i = 0; i < s_RandomSizes.size(); ++i)
 			{
 				void* address;
-				address = alloc->Allocate(m_RandomSizes[i], s_MaxAlignment);
+				address = alloc->Allocate(s_RandomSizes[i], s_MaxAlignment);
 				state.PauseTiming();
 				if (*it == i)
 				{
@@ -104,18 +103,22 @@ protected:
 			{
 				alloc->Deallocate(addresses[i]);
 			}
-			for (std::size_t i = 0; i < m_RandomSizes.size(); ++i)
+			for (std::size_t i = 0; i < s_RandomSizes.size(); ++i)
 			{
-				benchmark::DoNotOptimize(alloc->Allocate(m_RandomSizes[i], s_MaxAlignment));
+				benchmark::DoNotOptimize(alloc->Allocate(s_RandomSizes[i], s_MaxAlignment));
 			}
 			state.PauseTiming();
 			alloc->Reset();
 			addresses.clear();
-			it = m_DeallocationIndices.begin();
+			it = s_DeallocationIndices.begin();
 			state.ResumeTiming();
 		}
 	}
 };
+
+std::vector<std::size_t> MultipleFixedAllocations::s_Sizes;
+std::vector<std::size_t> MultipleFixedAllocations::s_RandomSizes;
+std::vector<std::size_t> MultipleFixedAllocations::s_DeallocationIndices;
 
 BENCHMARK_F(MultipleFixedAllocations, CAllocator)(benchmark::State& state)
 {
