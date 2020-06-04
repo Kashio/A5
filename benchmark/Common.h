@@ -8,7 +8,9 @@ extern std::size_t s_NumOfRandAllocations;
 extern std::size_t s_MaxBlockSize;
 extern std::size_t s_30MB;
 extern std::vector<std::size_t> s_Sizes;
+extern std::size_t s_SizesAgg;
 extern std::vector<std::size_t> s_RandomSizes;
+extern std::size_t s_RandomSizesAgg;
 extern std::vector<std::size_t> s_DeallocationIndices;
 
 namespace Utils

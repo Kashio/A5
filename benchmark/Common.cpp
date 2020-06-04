@@ -7,7 +7,9 @@ std::size_t s_NumOfRandAllocations = 1000;
 std::size_t s_MaxBlockSize = 8192;
 std::size_t s_30MB = 1024 * 1024 * 30;
 std::vector<std::size_t> s_Sizes;
+std::size_t s_SizesAgg;
 std::vector<std::size_t> s_RandomSizes;
+std::size_t s_RandomSizesAgg;
 std::vector<std::size_t> s_DeallocationIndices;
 
 namespace Utils
