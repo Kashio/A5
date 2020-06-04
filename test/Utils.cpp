@@ -13,7 +13,7 @@ static unsigned int SelectRandomly(unsigned int max)
 	return dis(gen);
 }
 
-static void FillRandomBytes(std::unordered_map<void*, std::vector<unsigned char>>& addresses, void* address, unsigned int count)
+static void FillRandomBytes(std::unordered_map<void*, std::vector<unsigned char>>& addresses, void* address, std::size_t count)
 {
 	if (address == nullptr)
 		return;

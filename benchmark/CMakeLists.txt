@@ -1,4 +1,4 @@
-add_executable(benchmarks Allocations.cpp Utils.cpp)
+add_executable(benchmarks main.cpp Common.h Common.cpp Allocations.cpp)
 
 FetchContent_Declare(googlebenchmark
                      GIT_REPOSITORY https://github.com/google/benchmark
@@ -6,4 +6,4 @@ FetchContent_Declare(googlebenchmark
         )
 FetchContent_MakeAvailable(googlebenchmark)
 
-target_link_libraries(benchmarks PRIVATE A5 benchmark::benchmark_main)
+target_link_libraries(benchmarks PRIVATE A5 benchmark::benchmark)
