@@ -27,7 +27,7 @@ void* A5::StackAllocator::Allocate(const std::size_t size, const std::size_t ali
 	std::size_t padding = (std::size_t)nextAddress - (std::size_t)currentAddress;
 
 	Header* header = reinterpret_cast<Header*>(reinterpret_cast<char*>(nextAddress) - sizeof(Header));
-	*header = padding;
+	*header = (Header)padding;
 
 	m_Offset = (std::size_t)nextAddress - (std::size_t)m_StartAddress + size;
 

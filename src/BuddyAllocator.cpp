@@ -20,7 +20,7 @@ A5::BuddyAllocator::~BuddyAllocator()
 
 void* A5::BuddyAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
-	int x = std::ceil(std::log2(size));
+	int x = (int)std::ceil(std::log2(size));
 
 	if (m_FreeLists[x].size() > 0)
 	{
@@ -64,7 +64,7 @@ void A5::BuddyAllocator::Deallocate(void* ptr)
 	if (it == m_BlockSize.end())
 		return;
 
-	std::size_t x = std::log2(it->second);
+	std::size_t x = (std::size_t)std::log2(it->second);
 	std::size_t buddyNumber;
 	char* buddyAddress;
 

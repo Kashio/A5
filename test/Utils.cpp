@@ -18,7 +18,7 @@ static void FillRandomBytes(std::unordered_map<void*, std::vector<unsigned char>
 	if (address == nullptr)
 		return;
 	addresses[address] = std::vector<unsigned char>(count);
-	for (int i = 0; i < count; ++i)
+	for (unsigned int i = 0; i < count; ++i)
 	{
 		unsigned char byte = (unsigned char)SelectRandomly(255);
 		addresses[address][i] = byte;
@@ -46,7 +46,7 @@ static void RandomAllocate(A5::Allocator* alloc)
 	for (auto a : addresses)
 	{
 		void* address = a.first;
-		for (int i = 0; i < a.second.size(); ++i)
+		for (unsigned int i = 0; i < a.second.size(); ++i)
 		{
 			ASSERT_EQ(a.second[i], *(reinterpret_cast<unsigned char*>(address) + i));
 		}
@@ -78,7 +78,7 @@ static void RandomAllocateDeallocate(A5::Allocator* alloc)
 		alloc->Deallocate(a);
 		addresses.erase(a);
 	}
-	for (int i = 0; i < addressesToDeallocate.size(); ++i)
+	for (unsigned int i = 0; i < addressesToDeallocate.size(); ++i)
 	{
 		void* address = alloc->Allocate(randomSizes[i], maxAlignment);
 		FillRandomBytes(addresses, address, randomSizes[i]);
@@ -86,7 +86,7 @@ static void RandomAllocateDeallocate(A5::Allocator* alloc)
 	for (auto a : addresses)
 	{
 		void* address = a.first;
-		for (int i = 0; i < a.second.size(); ++i)
+		for (unsigned int i = 0; i < a.second.size(); ++i)
 		{
 			ASSERT_EQ(a.second[i], *(reinterpret_cast<unsigned char*>(address) + i));
 		}
@@ -97,7 +97,7 @@ static void RandomAllocateDeallocateLinearly(A5::Allocator* alloc)
 {
 	std::vector<std::size_t> randomSizes;
 	randomSizes.reserve(1000);
-	for (std::size_t i = 0; i < randomSizes.capacity(); ++i)
+	for (unsigned int i = 0; i < randomSizes.capacity(); ++i)
 	{
 		randomSizes.push_back(SelectRandomly(512) + 1);
 	}
@@ -107,7 +107,7 @@ static void RandomAllocateDeallocateLinearly(A5::Allocator* alloc)
 
 	std::vector<void*> addressesToDeallocate;
 	addressesToDeallocate.reserve(SelectRandomly(100));
-	for (int i = 0; i < randomSizes.size(); ++i)
+	for (unsigned int i = 0; i < randomSizes.size(); ++i)
 	{
 		void* address = alloc->Allocate(randomSizes[i], maxAlignment);
 		FillRandomBytes(addresses, address, randomSizes[i]);
@@ -121,7 +121,7 @@ static void RandomAllocateDeallocateLinearly(A5::Allocator* alloc)
 		alloc->Deallocate(a);
 		addresses.erase(a);
 	}
-	for (int i = 0; i < addressesToDeallocate.size(); ++i)
+	for (unsigned int i = 0; i < addressesToDeallocate.size(); ++i)
 	{
 		void* address = alloc->Allocate(randomSizes[i], maxAlignment);
 		FillRandomBytes(addresses, address, randomSizes[i]);
@@ -142,7 +142,7 @@ static void FixedAllocateDeallocate(A5::Allocator* alloc, const std::size_t size
 	addresses.reserve(1000);
 
 	std::vector<void*> addressesToDeallocate;
-	for (int i = 0; i < 1000; ++i)
+	for (unsigned int i = 0; i < 1000; ++i)
 	{
 		void* address = alloc->Allocate(size, maxAlignment);
 		FillRandomBytes(addresses, address, size);
@@ -154,7 +154,7 @@ static void FixedAllocateDeallocate(A5::Allocator* alloc, const std::size_t size
 		alloc->Deallocate(a);
 		addresses.erase(a);
 	}
-	for (int i = 0; i < addressesToDeallocate.size(); ++i)
+	for (unsigned int i = 0; i < addressesToDeallocate.size(); ++i)
 	{
 		void* address = alloc->Allocate(size, maxAlignment);
 		FillRandomBytes(addresses, address, size);
@@ -162,7 +162,7 @@ static void FixedAllocateDeallocate(A5::Allocator* alloc, const std::size_t size
 	for (auto a : addresses)
 	{
 		void* address = a.first;
-		for (int i = 0; i < a.second.size(); ++i)
+		for (unsigned int i = 0; i < a.second.size(); ++i)
 		{
 			ASSERT_EQ(a.second[i], *(reinterpret_cast<unsigned char*>(address) + i));
 		}

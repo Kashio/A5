@@ -66,7 +66,7 @@ A5::PoolAllocator::Chunk* A5::PoolAllocator::AllocateBlock(const std::size_t chu
 
 	Chunk* chunk = block;
 
-	for (int i = 0; i < m_Size / m_ChunkSize - 1; ++i) {
+	for (std::size_t i = 0; i < m_Size / m_ChunkSize - 1; ++i) {
 		chunk->m_Next = reinterpret_cast<Chunk*>(reinterpret_cast<char*>(chunk) + chunkSize);
 		chunk = chunk->m_Next;
 	}
