@@ -1,5 +1,7 @@
 add_executable(benchmarks main.cpp Common.h Common.cpp Allocations.cpp)
 
+set(BENCHMARK_ENABLE_TESTING OFF)
+
 FetchContent_Declare(googlebenchmark
                      GIT_REPOSITORY https://github.com/google/benchmark
 					 GIT_TAG master
