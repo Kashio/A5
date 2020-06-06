@@ -123,7 +123,17 @@ There's internal fragmentation by the nature of this allocator, if a requested a
 It is best to use this allocator when your data is size of power of 2 to keep internal fragmentation lower, but generally it is more slower than other general uses allocators.
 
 ## Benchmarks
+Note that in all benchmarks the size of allocated block given to the Pool allocator is **8192**.
 The following chart shows the sequential allocation of blocks of sizes `1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192`:
 ![figure_1](assets/Figure_1.png?raw=true)
 The next chart shows the sequential allocations of random sized blocks up to **100,000** blocks:
 ![figure_2](assets/Figure_2.png?raw=true)
+You might be wondering how the free list allocator outperform the tree list allocator.
+Well since all these 2 benchmark did is to allocate and no deallocate at all, it was the best case `O(1)` for finding a free node in the linked list
+while in the tree list allocator you pay extra penalty for each allocation where the tree update and it's more costly than the linked list update.
+Where the tree list allocator really shines and outperform the free list allocator is where there're starting to develop gaps between the nodes and
+the allocation is not just being sequentially which might be more close to what real applications allocation and deallocation patterns look like.
+The following chart show the performance of each allocator doing sequential allocations of random sized blocks up to **100,000** blocks
+while each block has **25%** to be later deallocated. After the deallocation phase, we go over and try to allocate another batch up to **100,000**
+while this time there're holes inside the memory of each allocator:
+![figure_3](assets/Figure_3.png?raw=true)
