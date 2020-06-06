@@ -69,3 +69,59 @@ You can disable install and testing by setting these variables which are `ON` by
 A5_ENABLE_INSTALL
 A5_ENABLE_TESTING
 ```
+## Allocators
+### Linear Allocator
+Fastest allocation, calculate address to be multiple of alignment and return a pointer to that address.
+Low on overhead memory since it's not need to keep any kind of book keeping structure becase it only allows deallocation of the whole buffer and not of specific addreeses. There's minimum internal fragmentation that is caused by the alignment of the returned addresses.
+It is best to use this allocator when you only need to deallocate everything at once.
+
+### Stack Allocator
+Fastest allocation after Linear Allocator, calculate address to be multiple of alignment and return a pointer to that address.
+Low on overhead memory, but uses a header to keep the padding required for the current allocated address to be aligned. This header is only 1 byte in size so it can be aligned to any address and be adjacent to the allocated block. This header is used for deallocating addreeses in a stack like order, so you can only deallocate in reverse order of allocation.
+There's minimum internal fragmentation that is caused by the alignment of the returned address and the header for saving it.
+It is best to use this allocator when you can deallocate in a last in first out order.
+
+### Pool Allocator
+Pool allocator is a fixed size allocator, meaning you can only allocate chunks of predefined size.
+The allocator keeps an explicit linked list of free chunks, and so when a request to allocate is called, the first available chunk is returned and the list updates accordingly.
+There's no memory overhead to this allocator because the free chunks list is stored inside the memory area allocated by the allocator itself to save memory, and each chunk is replaced completetly by the data of the payload. To make sure your addresses are alligned correctly, specify a chunk size of the next multiple of your required structure alignment that is bigger than your structure size.
+For example `sizeof(S) == 42` and `alignof(S) == 8` then pass **48** as the chunk size.
+This can be calculated in a generalized form as follows:
+```cpp
+sizeof(S) % alignof(S) == 0 ? sizeof(S) : sizeof(S) + alignof(S) - sizeof(S) % alignof(S);
+```
+There will be fragmentation only if `sizeof(S)` is not a multiple of `alignof(S)` and a different chunk size is needed to be calculated inorder for the data to be properly aligned.
+It is best to use this allocator when you need to allocate data of a specific size and you need to deallocate an address at anytime regardless of the other allocations.
+
+### Free List Allocator
+Free list allocator, is the same as pool allocator, but it allows for any size of data to be allocated.
+The alloctor keeps an explicit linked list of free nodes, and so when a request to allocate is called, a node with sufficient size is returned and the list updates accordingly.
+There's a memory overhead to this allocator, each allocation is also storing a header that saves the size of the allocated block, but the explicit linked list of free nodes is stored inside the memory area allocated by the alloctor itself to save some memory.
+There's internal fragmentation depending on the size of the allocation, since header is defined with alignment `alignas(std::max_align_t)` so the address of the allocated block will always be aligned regardless of size, but to make sure the next header in the list is aligned we need to calculate padding to the next address that is aligned to `std::max_align_t`.
+The allocator can search for the first fit free node it finds, or it can also search for the be fit node it finds.
+Usually best fit is better, although it searches the entire free list for a node, that usually means that larger nodes are not spent on small allocations and thus making future allocations potentially faster than first fit. Best fit also reduce internal fragmentation needed for padding.
+When a node is found it can be potentially splitted to another node if there's anough space.
+Also when an address is deallocated it can be merged with the 2 adjacent nodes to it, if they're free. 
+It is best to use this allocator when you need to allocate data of different sizes and you need to deallocate an address at anytime regardless of other allocations.
+
+### Free Tree Allocator
+Free tree allocator, is the same as free list allocator, but instead of the free nodes being stored as an explicit linked list, they're being stored inside a red black tree that is also stored inside the memory area allocated by the alloctor itself to save some memory.
+This red black tree structure allows us to do allocation and deallocation operations in **O(LogN)** instead of **O(N)** like in the free list alloctor.
+There's a memory overhead to this alloctor, each allocation is also storing a header that saves the size of the allocated block as-well as the size of the previous block (if allocated). This previous block size helps us to do merging in **O(1)**.
+By the nature of the red black tree structure this allocator support best fit search of free node.
+The internal fragmentation is the same as the free list allocator.
+This is generally a better version of the free list allocator so in most cases it will be better to use it depending on the pattern of your allocations and deallocations.
+
+### Buddy Allocator
+Buddy allocator is an allocator that saves free blocks of sizes of power of 2 up to the nearest power of 2 to the allocator size, that is greater or equal to the size.
+For example a buddy allocator with size of **120** bytes will have blocks of sizes `1, 2, 4, 8, 16, 32, 64, 128`.
+When a request to allocate is called, the allocator will find the best fitted size block for the allocation, and if non are free, then it will split higher order blocks to smaller order blocks, until the block size of the desired order is created.
+Similarly, when deallocating, blocks that were splitted before by the allocation process will be merged together to higher order block if both are free.
+The allocator uses an `std::vector` and `std::unordered_map` internally to for book keeping of the free blocks and their sizes, and allocated blocks and their sizes, so there's definitely a memory overhead.
+Also the use of `std::vector` and `std::unordered_map` causing some indirections and so performance will degrade as-well.
+There's internal fragmentation by the nature of this allocator, if a requested allocation size is not multiple of power of 2 then some of the memory of the blocks will go to waste.
+It is best to use this allocator when your data is size of power of 2 to keep internal fragmentation lower, but generally it is more slower than other general uses allocators.
+
+## Benchmarks
+The following chart shows the sequential allocation of blocks of sizes `1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192`:
+![graph_1](https://imgur.com/ztw6pcr)
