@@ -125,91 +125,158 @@ static void Allocate_CAllocator(benchmark::State& state)
 {
 	A5::CAllocator alloc;
 	BenchmarkMultipleAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_SizesAgg));
+	std::size_t sizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		sizesAgg += s_Sizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * sizesAgg);
 }
 
 static void Allocate_LinearAllocator(benchmark::State& state)
 {
 	A5::LinearAllocator alloc(s_1GB);
 	BenchmarkMultipleAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_SizesAgg));
+	std::size_t sizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		sizesAgg += s_Sizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * sizesAgg);
 }
 
 static void Allocate_StackAllocator(benchmark::State& state)
 {
 	A5::StackAllocator alloc(s_1GB);
 	BenchmarkMultipleAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_SizesAgg));
+	std::size_t sizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		sizesAgg += s_Sizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * sizesAgg);
 }
 
 static void Allocate_PoolAllocator(benchmark::State& state)
 {
 	A5::PoolAllocator alloc(s_1GB, s_MaxBlockSize, true);
 	BenchmarkMultipleFixedAllocations(&alloc, state, s_MaxBlockSize);
-	state.SetBytesProcessed(int64_t(state.iterations()) * s_Sizes.size() * s_MaxBlockSize);
+	state.SetBytesProcessed(int64_t(state.iterations()) * state.range(0) * s_MaxBlockSize);
 }
 
 static void Allocate_FreeListAllocator(benchmark::State& state)
 {
 	A5::FreeListAllocator alloc(s_1GB, A5::FreeListAllocator::SearchMethod::BEST);
 	BenchmarkMultipleAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_SizesAgg));
+	std::size_t sizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		sizesAgg += s_Sizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * sizesAgg);
 }
 
 static void Allocate_FreeTreeAllocator(benchmark::State& state)
 {
 	A5::FreeTreeAllocator alloc(s_1GB);
 	BenchmarkMultipleAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_SizesAgg));
+	std::size_t sizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		sizesAgg += s_Sizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * sizesAgg);
 }
 
 static void Allocate_BuddyAllocator(benchmark::State& state)
 {
 	A5::BuddyAllocator alloc(s_1GB);
 	BenchmarkMultipleAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_SizesAgg));
+	std::size_t sizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		sizesAgg += s_Sizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * sizesAgg);
 }
 
 static void RandomAllocate_CAllocator(benchmark::State& state)
 {
 	A5::CAllocator alloc;
 	BenchmarkMultieRandomAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_RandomSizesAgg));
+	std::size_t randomSizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		randomSizesAgg += s_RandomSizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
 }
 
 static void RandomAllocate_LinearAllocator(benchmark::State& state)
 {
 	A5::LinearAllocator alloc(s_1GB);
 	BenchmarkMultieRandomAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_RandomSizesAgg));
+	std::size_t randomSizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		randomSizesAgg += s_RandomSizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
 }
 
 static void RandomAllocate_StackAllocator(benchmark::State& state)
 {
 	A5::StackAllocator alloc(s_1GB);
 	BenchmarkMultieRandomAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_RandomSizesAgg));
+	std::size_t randomSizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		randomSizesAgg += s_RandomSizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
+}
+
+static void RandomAllocate_PoolAllocator(benchmark::State& state)
+{
+	A5::StackAllocator alloc(s_1GB);
+	BenchmarkMultieRandomAllocations(&alloc, state);
+	state.SetBytesProcessed(int64_t(state.iterations()) * state.range(0) * s_MaxBlockSize);
 }
 
 static void RandomAllocate_FreeListAllocator(benchmark::State& state)
 {
 	A5::FreeListAllocator alloc(s_1GB, A5::FreeListAllocator::SearchMethod::BEST);
 	BenchmarkMultieRandomAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_RandomSizesAgg));
+	std::size_t randomSizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		randomSizesAgg += s_RandomSizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
 }
 
 static void RandomAllocate_FreeTreeAllocator(benchmark::State& state)
 {
 	A5::FreeTreeAllocator alloc(s_1GB);
 	BenchmarkMultieRandomAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_RandomSizesAgg));
+	std::size_t randomSizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		randomSizesAgg += s_RandomSizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
 }
 
 static void RandomAllocate_BuddyAllocator(benchmark::State& state)
 {
 	A5::BuddyAllocator alloc(s_1GB);
 	BenchmarkMultieRandomAllocations(&alloc, state);
-	state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(s_RandomSizesAgg));
+	std::size_t randomSizesAgg = 0;
+	for (unsigned int i = 0; i < state.range(0); ++i)
+	{
+		randomSizesAgg += s_RandomSizes[i];
+	}
+	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
 }
 
 static void RandomAllocateAndFree_CAllocator(benchmark::State& state)
