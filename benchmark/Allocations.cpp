@@ -315,7 +315,7 @@ static void RandomAllocateAndFree_StackAllocator(benchmark::State& state)
 	state.SetBytesProcessed(int64_t(state.iterations()) * randomSizesAgg);
 }
 
-static void FixedAllocateAndRandomFree_PoolAllocator(benchmark::State& state)
+static void RandomAllocateAndFree_PoolAllocator(benchmark::State& state)
 {
 	A5::PoolAllocator alloc(s_1GB, s_MaxBlockSize, true);
 	BenchmarkMultieFixedAllocationsAndFrees(&alloc, state, s_MaxBlockSize);
