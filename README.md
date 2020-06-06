@@ -129,7 +129,7 @@ The following chart shows the sequential allocation of blocks of sizes `1, 2, 4,
 The next chart shows the sequential allocations of random sized blocks up to **100,000** blocks:
 ![figure_2](assets/Figure_2.png?raw=true)
 You might be wondering how the free list allocator outperform the tree list allocator.
-Well since all these 2 benchmark did is to allocate and no deallocate at all, it was the best case `O(1)` for finding a free node in the linked list
+Well since all these 2 benchmark did is to allocate and no deallocate at all, it was the best case **O(1)** for finding a free node in the linked list
 while in the tree list allocator you pay extra penalty for each allocation where the tree update and it's more costly than the linked list update.
 Where the tree list allocator really shines and outperform the free list allocator is where there're starting to develop gaps between the nodes and
 the allocation is not just being sequentially which might be more close to what real applications allocation and deallocation patterns look like.
