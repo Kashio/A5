@@ -1,7 +1,6 @@
 #ifndef RBTREE_H
 #define RBTREE_H
 
-#include <type_traits>
 #include <string>
 
 namespace A5
@@ -59,7 +58,6 @@ namespace A5
 		Node* m_Nil;
 		Node* m_Root;
 	public:
-		RBTree();
 		void Init(Node* nil);
 		Node* Search(const std::size_t v);
 		Node* SearchBest(const std::size_t v);

@@ -3,9 +3,9 @@
 #include <random>
 
 std::size_t s_MaxAlignment = alignof(std::max_align_t);
-std::size_t s_NumOfRandAllocations = 1000;
-std::size_t s_MaxBlockSize = 8192;
-std::size_t s_30MB = 1024 * 1024 * 30;
+std::size_t s_NumOfRandAllocations = 1e5;
+std::size_t s_MaxBlockSize = 4096;
+std::size_t s_1GB = 1024 * 1024 * 1024;
 std::vector<std::size_t> s_Sizes;
 std::size_t s_SizesAgg;
 std::vector<std::size_t> s_RandomSizes;

@@ -9,8 +9,8 @@ A5::FreeTreeAllocator::FreeTreeAllocator(const std::size_t size)
 	: Allocator(size)
 {
 	static std::size_t rootNodePadding = GetRootNodePadding();
-	static std::string message = "Total size must be bigger than size of " + std::to_string(sizeof(RBTree::Node) * 2 + rootNodePadding) + " for allocator with atleast " + std::to_string(sizeof(RBTree::Node) - sizeof(Header)) + " bytes space";
-	assert(size > sizeof(RBTree::Node) * 2 + rootNodePadding && message.c_str());
+	static std::string message = "Total size must be atleast " + std::to_string(sizeof(RBTree::Node) * 2 + rootNodePadding) + " bytes for an allocator with atleast " + std::to_string(sizeof(RBTree::Node) - sizeof(Header)) + " bytes of free space";
+	assert(size >= sizeof(RBTree::Node) * 2 + rootNodePadding && message.c_str());
 	m_StartAddress = ::operator new(size);
 	Init();
 }
@@ -32,7 +32,7 @@ void* A5::FreeTreeAllocator::Allocate(const std::size_t size, const std::size_t 
 
 	RBTree::Node* node = m_Tree.SearchBest(size + padding);
 
-	if (node == nullptr || node->m_Value < size + padding)
+	if (node == nullptr)
 	{
 		return nullptr;
 	}

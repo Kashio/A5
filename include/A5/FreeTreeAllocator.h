@@ -3,7 +3,6 @@
 
 #include "Allocator.h"
 
-#include <vector>
 #include "RBTree.h"
 
 namespace A5

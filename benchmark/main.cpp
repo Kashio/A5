@@ -17,28 +17,28 @@ static void SetUp()
 	}
 }
 
-BENCHMARK(Allocate_CAllocator);
-BENCHMARK(Allocate_LinearAllocator);
-BENCHMARK(Allocate_StackAllocator);
-BENCHMARK(Allocate_PoolAllocator);
-BENCHMARK(Allocate_FreeListAllocator);
-BENCHMARK(Allocate_FreeTreeAllocator);
-BENCHMARK(Allocate_BuddyAllocator);
+BENCHMARK(Allocate_CAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
+BENCHMARK(Allocate_LinearAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
+BENCHMARK(Allocate_StackAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
+BENCHMARK(Allocate_PoolAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
+BENCHMARK(Allocate_FreeListAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
+BENCHMARK(Allocate_FreeTreeAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
+BENCHMARK(Allocate_BuddyAllocator)->DenseRange(0, s_Sizes.size(), 1)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(RandomAllocate_CAllocator);
-BENCHMARK(RandomAllocate_LinearAllocator);
-BENCHMARK(RandomAllocate_StackAllocator);
-BENCHMARK(RandomAllocate_FreeListAllocator);
-BENCHMARK(RandomAllocate_FreeTreeAllocator);
-BENCHMARK(RandomAllocate_BuddyAllocator);
+BENCHMARK(RandomAllocate_CAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocate_LinearAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocate_StackAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocate_FreeListAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocate_FreeTreeAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocate_BuddyAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
 
-BENCHMARK(RandomAllocateAndFree_CAllocator);
-BENCHMARK(RandomAllocateAndFree_LinearAllocator);
-BENCHMARK(RandomAllocateAndFree_StackAllocator);
-BENCHMARK(FixedAllocateAndRandomFree_PoolAllocator);
-BENCHMARK(RandomAllocateAndFree_FreeListAllocator);
-BENCHMARK(RandomAllocateAndFree_FreeTreeAllocator);
-BENCHMARK(RandomAllocateAndFree_BuddyAllocator);
+BENCHMARK(RandomAllocateAndFree_CAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocateAndFree_LinearAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocateAndFree_StackAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(FixedAllocateAndRandomFree_PoolAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocateAndFree_FreeListAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocateAndFree_FreeTreeAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
+BENCHMARK(RandomAllocateAndFree_BuddyAllocator)->DenseRange(0, s_NumOfRandAllocations, 10000)->Unit(benchmark::kMillisecond);
 
 int main(int argc, char** argv)
 {

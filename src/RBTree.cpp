@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-A5::RBTree::RBTree()
-{
-}
-
 void A5::RBTree::Init(Node* nil)
 {
 	m_Nil = nil;

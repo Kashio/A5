@@ -7,6 +7,7 @@ set(headers
 	"${A5_SOURCE_DIR}/include/A5/FreeListAllocator.h"
 	"${A5_SOURCE_DIR}/include/A5/FreeTreeAllocator.h"
 	"${A5_SOURCE_DIR}/include/A5/BuddyAllocator.h"
+	"${A5_SOURCE_DIR}/include/A5/LinkedList.h"
 	"${A5_SOURCE_DIR}/include/A5/RBTree.h")
 
 add_library(A5
@@ -18,6 +19,7 @@ add_library(A5
 			"FreeListAllocator.cpp"
 			"FreeTreeAllocator.cpp"
 			"BuddyAllocator.cpp"
+			"LinkedList.cpp"
 			"RBTree.cpp"
 			)
 

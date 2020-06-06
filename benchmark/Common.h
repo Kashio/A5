@@ -6,7 +6,7 @@
 extern std::size_t s_MaxAlignment;
 extern std::size_t s_NumOfRandAllocations;
 extern std::size_t s_MaxBlockSize;
-extern std::size_t s_30MB;
+extern std::size_t s_1GB;
 extern std::vector<std::size_t> s_Sizes;
 extern std::size_t s_SizesAgg;
 extern std::vector<std::size_t> s_RandomSizes;

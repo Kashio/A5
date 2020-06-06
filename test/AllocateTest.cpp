@@ -33,7 +33,7 @@ TEST(AllocateTest, PoolAllocatorAllocation)
 
 TEST(AllocateTest, FreeListAllocatorAllocation)
 {
-	A5::FreeListAllocator alloc(mb);
+	A5::FreeListAllocator alloc(mb, A5::FreeListAllocator::SearchMethod::BEST);
 	RandomAllocateDeallocate(&alloc);
 }
 
