@@ -26,7 +26,8 @@ namespace A5
 		void Deallocate(void* ptr) override;
 		void Reset() override;
 	private:
-		Chunk* AllocateBlock(const std::size_t chunkSize);
+		Chunk* AllocateBlock();
+		void LinkChunks(Chunk* block);
 	};
 };
 
