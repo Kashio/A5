@@ -37,8 +37,10 @@ void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t 
 	{
 	case SearchMethod::FIRST:
 		m_List.SearchFirst(size + padding, best, prev);
-	default:
+		break;
+	case SearchMethod::BEST:
 		m_List.SearchBest(size + padding, best, prev);
+		break;
 	}
 
 	if (best == nullptr)
