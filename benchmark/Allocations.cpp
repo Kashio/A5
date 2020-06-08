@@ -63,7 +63,7 @@ static void BenchmarkMultieRandomAllocationsAndFrees(A5::Allocator* alloc, bench
 			void* address;
 			address = alloc->Allocate(s_RandomSizes[i], s_MaxAlignment);
 			state.PauseTiming();
-			if (it != s_DeallocationIndices .end() && *it == i)
+			if (it != s_DeallocationIndices.end() && *it == i)
 			{
 				addresses.push_back(address);
 				++it;
@@ -109,12 +109,13 @@ static void BenchmarkMultieFixedAllocationsAndFrees(A5::Allocator* alloc, benchm
 		{
 			alloc->Deallocate(addresses[i]);
 		}
-		for (std::size_t i = 0; i < state.range(0); ++i)
+		for (std::size_t i = 0; i < addresses.size(); ++i)
 		{
 			benchmark::DoNotOptimize(alloc->Allocate(size, s_MaxAlignment));
 		}
 		state.PauseTiming();
-		alloc->Reset();
+		if (state.range(0) != 0)
+			alloc->Reset();
 		addresses.clear();
 		it = s_DeallocationIndices.begin();
 		state.ResumeTiming();
@@ -159,7 +160,7 @@ static void Allocate_StackAllocator(benchmark::State& state)
 
 static void Allocate_PoolAllocator(benchmark::State& state)
 {
-	A5::PoolAllocator alloc(s_1GB, s_MaxBlockSize, true);
+	A5::PoolAllocator alloc(s_1GB, s_MaxBlockSize, false);
 	BenchmarkMultipleFixedAllocations(&alloc, state, s_MaxBlockSize);
 	state.SetBytesProcessed(int64_t(state.iterations()) * state.range(0) * s_MaxBlockSize);
 }
@@ -317,7 +318,7 @@ static void RandomAllocateAndFree_StackAllocator(benchmark::State& state)
 
 static void RandomAllocateAndFree_PoolAllocator(benchmark::State& state)
 {
-	A5::PoolAllocator alloc(s_1GB, s_MaxBlockSize, true);
+	A5::PoolAllocator alloc(s_1GB, s_MaxBlockSize, false);
 	BenchmarkMultieFixedAllocationsAndFrees(&alloc, state, s_MaxBlockSize);
 	state.SetBytesProcessed(int64_t(state.iterations()) * state.range(0) * s_MaxBlockSize);
 }
