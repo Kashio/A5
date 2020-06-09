@@ -50,7 +50,16 @@ void* A5::PoolAllocator::Allocate(const std::size_t size, const std::size_t alig
 	}
 
 	Chunk* chunk = m_Head;
-	m_Head = m_Head->m_Next;
+	if (chunk->m_Next == nullptr &&
+		(std::size_t)reinterpret_cast<char*>(chunk) + m_ChunkSize != (std::size_t)reinterpret_cast<char*>(m_Blocks[m_CurrentBlock - 1]) + m_Size)
+	{
+		m_Head = reinterpret_cast<Chunk*>(reinterpret_cast<char*>(chunk) + m_ChunkSize);
+		m_Head->m_Next = nullptr;
+	}
+	else
+	{
+		m_Head = m_Head->m_Next;
+	}
 
 	return chunk;
 }
@@ -65,7 +74,7 @@ void A5::PoolAllocator::Reset()
 {
 	for (auto& block : m_Blocks)
 	{
-		LinkChunks(reinterpret_cast<Chunk*>(block));
+		reinterpret_cast<Chunk*>(block)->m_Next = nullptr;
 	}
 	m_Head = reinterpret_cast<Chunk*>(m_StartAddress);
 	m_CurrentBlock = 1;
@@ -74,19 +83,6 @@ void A5::PoolAllocator::Reset()
 A5::PoolAllocator::Chunk* A5::PoolAllocator::AllocateBlock()
 {
 	Chunk* block = reinterpret_cast<Chunk*>(::operator new(m_Size));
-	LinkChunks(block);
+	block->m_Next = nullptr;
 	return block;
-}
-
-void A5::PoolAllocator::LinkChunks(Chunk* block)
-{
-	Chunk* chunk = block;
-
-	for (std::size_t i = 0; i < m_Size / m_ChunkSize - 1; ++i)
-	{
-		chunk->m_Next = reinterpret_cast<Chunk*>(reinterpret_cast<char*>(chunk) + m_ChunkSize);
-		chunk = chunk->m_Next;
-	}
-
-	chunk->m_Next = nullptr;
 }

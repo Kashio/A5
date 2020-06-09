@@ -27,7 +27,6 @@ namespace A5
 		void Reset() override;
 	private:
 		Chunk* AllocateBlock();
-		void LinkChunks(Chunk* block);
 	};
 };
 
