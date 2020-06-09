@@ -52,7 +52,7 @@ cd build
 cmake ..
 cmake --build . --target install
 ```
-and then you can just use `find_package(my_library ${A5_version_wanted} REQUIRED)`.
+and then you can just use `find_package(A5 ${A5_version_wanted} REQUIRED)`.
 
 To change between Debug/Release when building call cmake as follows
 on single-configurations generators:
