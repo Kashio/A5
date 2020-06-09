@@ -127,17 +127,28 @@ and also some of the memory is occupied by the **header** to know how much memor
 It is best to use this allocator when your data is size of power of 2 to keep internal fragmentation lower, but generally it is more slower than other general uses allocators.
 
 ## Benchmarks
-Note that in all benchmarks the size of allocated block given to the Pool allocator is **8192**.
-The following chart shows the sequential allocation of blocks of sizes `1, 2, 4, 8, 16, 32, 64, 256, 512, 1024, 2048, 4096, 8192`:
-![figure_1](assets/Figure_1.png?raw=true)
-The next chart shows the sequential allocations of random sized blocks up to **100,000** blocks:
+Note that in all benchmarks the size of allocated block given to the Pool allocator is **4096**.
+The following chart shows the sequential allocations of random sized blocks up to **100,000** blocks
+where all allocators gets the same random sizes:
 ![figure_2](assets/Figure_2.png?raw=true)
 You might be wondering how the free list allocator outperform the tree list allocator.
-Well since all these 2 benchmark did is to allocate and no deallocate at all, it was the best case **O(1)** for finding a free node in the linked list
+Well since all this benchmark did is to allocate and no deallocate at all, it was the best case **O(1)** for finding a free node in the linked list
 while in the tree list allocator you pay extra penalty for each allocation where the tree update and it's more costly than the linked list update.
 Where the tree list allocator really shines and outperform the free list allocator is where there're starting to develop gaps between the nodes and
-the allocation is not just being sequentially which might be more close to what real applications allocation and deallocation patterns look like.
-The following chart show the performance of each allocator doing sequential allocations of random sized blocks up to **100,000** blocks
-while each block has **25%** to be later deallocated. After the deallocation phase, we go over and try to allocate another batch up to **100,000**
+the allocation is not just being sequentially which might be more close to what real applications allocation and deallocation patterns might look like.
+The following chart show the performance of each allocator doing sequential allocations of random sized blocks up to **100,000** blocks like before,
+while each block has **25%** to be later deallocated. After the deallocation phase, we go over and try to allocate another batch of **100,000** blocks
 while this time there're holes inside the memory of each allocator:
 ![figure_3](assets/Figure_3.png?raw=true)
+
+While you might be biased by these charts on which allocator to pick,
+it is always best to pick the most strict allocator while also comforting to your data requirements because they're often the fastest one,
+and be sure to benchmark your application with different allocators since as can be seen different allocation & deallocation patterns might lead to different results.
+
+## Future work
+* Make use of red black tree to store buddies inside buddy allocator where the value is the block address
+to make deallocation **O(LogN)** instead of of **O(N)** where **N** is the number of free blocks in each bucket of power of 2.
+* Right better tests. Right now the provided tests are just sanity ones to check the allocators are not doing some weird stuff
+and overwriting values of other memory blocks.
+* Research on how to layer a slab allocator on top of buddy allocator to reduce internal fragmentation.
+* Rewrite this whole readme to be better..
