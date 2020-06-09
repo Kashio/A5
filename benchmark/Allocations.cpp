@@ -13,9 +13,9 @@ static void BenchmarkMultipleAllocations(A5::Allocator* alloc, benchmark::State&
 {
 	for (auto _ : state)
 	{
-		for (auto s : s_Sizes)
+		for (std::size_t i = 0; i < state.range(0); ++i)
 		{
-			benchmark::DoNotOptimize(alloc->Allocate(s, s_MaxAlignment));
+			benchmark::DoNotOptimize(alloc->Allocate(s_Sizes[i], s_MaxAlignment));
 		}
 		state.PauseTiming();
 		alloc->Reset();
@@ -27,7 +27,7 @@ static void BenchmarkMultipleFixedAllocations(A5::Allocator* alloc, benchmark::S
 {
 	for (auto _ : state)
 	{
-		for (auto s : s_Sizes)
+		for (std::size_t i = 0; i < state.range(0); ++i)
 		{
 			benchmark::DoNotOptimize(alloc->Allocate(size, s_MaxAlignment));
 		}
@@ -41,9 +41,9 @@ static void BenchmarkMultieRandomAllocations(A5::Allocator* alloc, benchmark::St
 {
 	for (auto _ : state)
 	{
-		for (auto s : s_RandomSizes)
+		for (std::size_t i = 0; i < state.range(0); ++i)
 		{
-			benchmark::DoNotOptimize(alloc->Allocate(s, s_MaxAlignment));
+			benchmark::DoNotOptimize(alloc->Allocate(s_RandomSizes[i], s_MaxAlignment));
 		}
 		state.PauseTiming();
 		alloc->Reset();

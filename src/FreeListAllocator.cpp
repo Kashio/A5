@@ -29,7 +29,6 @@ void* A5::FreeListAllocator::Allocate(const std::size_t size, const std::size_t 
 	std::align(alignof(std::max_align_t), sizeof(std::max_align_t), nextAddress, space);
 	padding = (std::size_t)nextAddress - (std::size_t)currentAddress;
 
-
 	LinkedList::Node* prev;
 	LinkedList::Node* best;
 
