@@ -114,12 +114,16 @@ This is generally a better version of the free list allocator so in most cases i
 
 ### Buddy Allocator
 Buddy allocator is an allocator that saves free blocks of sizes of power of 2 up to the nearest power of 2 to the allocator size, that is greater or equal to the size.
-For example a buddy allocator with size of **120** bytes will have blocks of sizes `1, 2, 4, 8, 16, 32, 64, 128`.
-When a request to allocate is called, the allocator will find the best fitted size block for the allocation, and if non are free, then it will split higher order blocks to smaller order blocks, until the block size of the desired order is created.
-Similarly, when deallocating, blocks that were splitted before by the allocation process will be merged together to higher order block if both are free.
-The allocator uses an `std::vector` and `std::unordered_map` internally to for book keeping of the free blocks and their sizes, and allocated blocks and their sizes, so there's definitely a memory overhead.
-Also the use of `std::vector` and `std::unordered_map` causing some indirections and so performance will degrade as-well.
-There's internal fragmentation by the nature of this allocator, if a requested allocation size is not multiple of power of 2 then some of the memory of the blocks will go to waste.
+For example a buddy allocator with size of **120** bytes will have blocks of sizes `8, [16, 32], 64, 128`.
+The reason **16** and **32** are inside square brackets is that it depends on a **header** struct size which stores how many bytes the current block is storing,
+So for x64 **header** size will be 16 bytes and for x32 the **header** size will be 8 bytes, and so it is a requirement,
+that the blocks must be atleast **header** size bytes to **just** to contain the **header** it self, so we are basically storing the power of 2 that is one
+greater than the power of 2 of the **header** size.
+When a request to allocate is called, the allocator will find the best fitted size block for the allocation, and if non are free,
+then it will split higher order blocks to smaller order blocks, until the block size of the desired order is created.
+Similarly, when deallocating, blocks that were splitted before by the allocation process, will be merged together to higher order block if both are free.
+There's internal fragmentation by the nature of this allocator, if a requested allocation size is not multiple of power of 2 then some of the memory of the blocks will go to waste,
+and also some of the memory is occupied by the **header** to know how much memory is occupied by the current memory block.
 It is best to use this allocator when your data is size of power of 2 to keep internal fragmentation lower, but generally it is more slower than other general uses allocators.
 
 ## Benchmarks

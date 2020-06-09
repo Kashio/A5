@@ -8,7 +8,8 @@ set(headers
 	"${A5_SOURCE_DIR}/include/A5/FreeTreeAllocator.h"
 	"${A5_SOURCE_DIR}/include/A5/BuddyAllocator.h"
 	"${A5_SOURCE_DIR}/include/A5/LinkedList.h"
-	"${A5_SOURCE_DIR}/include/A5/RBTree.h")
+	"${A5_SOURCE_DIR}/include/A5/RBTree.h"
+	"${A5_SOURCE_DIR}/include/A5/Utils.h")
 
 add_library(A5
 			${headers}

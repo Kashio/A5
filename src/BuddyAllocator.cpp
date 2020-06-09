@@ -7,9 +7,7 @@ A5::BuddyAllocator::BuddyAllocator(const std::size_t size)
 	: Allocator(size)
 {
 	m_StartAddress = ::operator new(size);
-	std::size_t x = (std::size_t)std::ceil(std::log2(m_Size));
-	m_FreeLists.reserve(x + 1);
-	Init(x);
+	Init();
 }
 
 A5::BuddyAllocator::~BuddyAllocator()
@@ -20,94 +18,132 @@ A5::BuddyAllocator::~BuddyAllocator()
 
 void* A5::BuddyAllocator::Allocate(const std::size_t size, const std::size_t alignment)
 {
-	int x = (int)std::ceil(std::log2(size));
+	int bucket = std::max(int(std::ceil(std::log2(size + sizeof(Header))) - 1 - s_Log2Header), 0);
 
-	if (m_FreeLists[x].size() > 0)
+	if (m_Buckets[bucket] != nullptr)
 	{
-		void* address = (void*)m_FreeLists[x][0].m_LowerBound;
-		m_BlockSize[m_FreeLists[x][0].m_LowerBound] = m_FreeLists[x][0].m_UpperBound - m_FreeLists[x][0].m_LowerBound + 1;
-		m_FreeLists[x].erase(m_FreeLists[x].begin());
+		Node* node = m_Buckets[bucket];
+		m_Buckets[bucket] = node->m_Next;
+		Header* header = reinterpret_cast<Header*>(node);
+		header->m_Size = (std::size_t)std::pow(2, bucket + 1 + s_Log2Header) | 1;
+		void* address = (void*)(reinterpret_cast<char*>(node) + sizeof(Header));
 		return address;
 	}
 
 	int i;
 
-	for (i = x + 1; i < m_FreeLists.size(); i++) {
-
-		if (m_FreeLists[i].size() > 0)
+	for (i = bucket + 1; i < m_Buckets.size(); ++i)
+	{
+		if (m_Buckets[i] != nullptr)
 			break;
 	}
 
-	if (i == m_FreeLists.size())
-	{
+	if (i == m_Buckets.size())
 		return nullptr;
-	}
 
-	Boundry temp = m_FreeLists[i][0];
-	m_FreeLists[i].erase(m_FreeLists[i].begin());
+	Node* temp = m_Buckets[i];
+	m_Buckets[i] = temp->m_Next;
 
 	--i;
 
-	for (; i >= x; i--)
+	for (; i >= bucket; i--)
 	{
-		m_FreeLists[i].emplace_back(temp.m_LowerBound + (temp.m_UpperBound - temp.m_LowerBound + 1) / 2, temp.m_UpperBound);
-		temp.m_UpperBound = temp.m_LowerBound + (temp.m_UpperBound - temp.m_LowerBound) / 2;
+		Node* node = reinterpret_cast<Node*>(reinterpret_cast<char*>(temp) + (std::size_t)std::pow(2, i + 1 + s_Log2Header));
+		node->m_Next = m_Buckets[i];
+		m_Buckets[i] = node;
 	}
 
-	m_BlockSize[temp.m_LowerBound] = temp.m_UpperBound - temp.m_LowerBound + 1;
-	return (void*)temp.m_LowerBound;
+	Header* header = reinterpret_cast<Header*>(temp);
+	header->m_Size = (std::size_t)std::pow(2, i + 2 + s_Log2Header) | 1;
+	void* address = (void*)(reinterpret_cast<char*>(temp) + sizeof(Header));
+
+	return address;
 }
 
 void A5::BuddyAllocator::Deallocate(void* ptr)
 {
-	auto it = m_BlockSize.find(static_cast<char*>(ptr));
-	if (it == m_BlockSize.end())
-		return;
+	Header* header = reinterpret_cast<Header*>(reinterpret_cast<char*>(ptr) - sizeof(Header));
 
-	std::size_t x = (std::size_t)std::log2(it->second);
+	const std::size_t size = header->m_Size & ~(std::size_t)1;
+	const std::size_t bucket = (std::size_t)std::log2(size) - 1 - s_Log2Header;
+
+	Node* node = reinterpret_cast<Node*>(header);
+
 	std::size_t buddyNumber;
 	char* buddyAddress;
 
-	m_FreeLists[x].emplace_back(static_cast<char*>(ptr), static_cast<char*>(ptr) + it->second - 1);
-
-	buddyNumber = (static_cast<char*>(ptr) - static_cast<char*>(m_StartAddress)) / it->second;
+	buddyNumber = (reinterpret_cast<char*>(header) - static_cast<char*>(m_StartAddress)) / size;
 
 	if (buddyNumber % 2 == 0)
-		buddyAddress = static_cast<char*>(ptr) + it->second;
+		buddyAddress = reinterpret_cast<char*>(header) + size;
 	else
-		buddyAddress = static_cast<char*>(ptr) - it->second;
+		buddyAddress = reinterpret_cast<char*>(header) - size;
 
-	for (std::size_t i = 0; i < m_FreeLists[x].size(); i++)
+	// Check if buddy is occupied to bale early from searching for it
+	if (buddyAddress == (static_cast<char*>(m_StartAddress) + m_Size) || *reinterpret_cast<std::size_t*>(buddyAddress) & 1)
 	{
-		if (m_FreeLists[x][i].m_LowerBound == buddyAddress)
-		{
-			if (buddyNumber % 2 == 0)
-				m_FreeLists[x + 1].emplace_back(static_cast<char*>(ptr), m_FreeLists[x][i].m_UpperBound);
-			else
-				m_FreeLists[x + 1].emplace_back(buddyAddress, static_cast<char*>(ptr) + it->second - 1);
+		node->m_Next = m_Buckets[bucket];
+		m_Buckets[bucket] = node;
+	}
+	else
+	{
+		Node* prevBuddy = nullptr;
+		Node* buddy = reinterpret_cast<Node*>(buddyAddress);
+		Node* context = m_Buckets[bucket];
 
-			m_FreeLists[x].erase(m_FreeLists[x].begin() + i);
-			m_FreeLists[x].erase(m_FreeLists[x].end() - 1);
-			break;
+		// Search the bucket for the buddy and update linked listed
+		// This could be improved from O(N) to O(LogN) with RBTree of addresses of nodes
+		while (context != buddy && context != nullptr)
+		{
+			prevBuddy = context;
+			context = context->m_Next;
+		}
+
+		// If buddy was not found in the bucket it was probably split so we can't merge
+		if (context == nullptr)
+		{
+			node->m_Next = m_Buckets[bucket];
+			m_Buckets[bucket] = node;
+		}
+		else
+		{
+			if (prevBuddy == nullptr)
+			{
+				m_Buckets[bucket] = buddy->m_Next;
+			}
+			else
+			{
+				prevBuddy->m_Next = buddy->m_Next;
+			}
+
+			if (buddyNumber % 2 == 0)
+			{
+				node->m_Next = m_Buckets[bucket + 1];
+				m_Buckets[bucket + 1] = node;
+			}
+			else
+			{
+				buddy->m_Next = m_Buckets[bucket + 1];
+				m_Buckets[bucket + 1] = buddy;
+			}
 		}
 	}
-
-	m_BlockSize.erase(it);
 }
 
 void A5::BuddyAllocator::Reset()
 {
-	std::size_t x = (std::size_t)std::ceil(std::log2(m_Size));
-	Init(x);
+	const std::size_t bucket = (std::size_t)std::ceil(std::log2(m_Size)) - 1 - s_Log2Header;
+	for (std::size_t i = 0; i < bucket; ++i)
+	{
+		m_Buckets[i] = nullptr;
+	}
+	Init();
 }
 
-void A5::BuddyAllocator::Init(const std::size_t x)
+void A5::BuddyAllocator::Init()
 {
-	m_BlockSize.clear();
-	m_FreeLists.clear();
-
-	for (std::size_t i = 0; i <= x; i++)
-		m_FreeLists.push_back(std::vector<Boundry>());
-
-	m_FreeLists[x].emplace_back(static_cast<char*>(m_StartAddress), static_cast<char*>(m_StartAddress) + m_Size - 1);
+	Node* root = reinterpret_cast<Node*>(m_StartAddress);
+	root->m_Next = nullptr;
+	const std::size_t bucket = (std::size_t)std::ceil(std::log2(m_Size)) - 1 - s_Log2Header;
+	m_Buckets[bucket] = root;
 }
